@@ -19,7 +19,7 @@ class AuthRepository @Inject constructor(
         userName: String,
         email: String,
         password: String
-    ): Flow<ResponseType<FirebaseUser>> = callbackFlow {
+    ): Flow<ResponseType<UserModel>> = callbackFlow {
 
         trySend(ResponseType.Loading())
 
@@ -33,12 +33,14 @@ class AuthRepository @Inject constructor(
                         email,
                         password,
                         "",
-                        ""
+                        "",
+                        "",
+                        "Available"
                     )
                 firebaseFirestore.collection("mechanicUsers")
                     .document(firebaseAuth.currentUser!!.uid)
                     .set(userModel)
-                trySend(ResponseType.Success(firebaseAuth.currentUser!!))
+                trySend(ResponseType.Success(userModel))
             } else {
                 trySend(ResponseType.Error(it.exception!!.message.toString()))
             }

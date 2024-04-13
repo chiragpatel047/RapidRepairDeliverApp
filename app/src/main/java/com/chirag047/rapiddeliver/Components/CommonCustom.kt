@@ -1,6 +1,7 @@
 package com.chirag047.rapiddeliver.Components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -54,7 +55,7 @@ fun textBetweenTwoLines(text: String) {
 
 
 @Composable
-fun textWithSeeAllText(title: String) {
+fun textWithSeeAllText(title: String, onClick: () -> Unit) {
 
     Row(
         modifier = Modifier
@@ -79,7 +80,10 @@ fun textWithSeeAllText(title: String) {
             textAlign = TextAlign.Start,
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.primary,
-            fontFamily = FontFamily(Font(R.font.poppins_medium))
+            fontFamily = FontFamily(Font(R.font.poppins_medium)),
+            modifier = Modifier.clickable {
+                onClick.invoke()
+            }
         )
 
     }

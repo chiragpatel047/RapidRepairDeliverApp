@@ -216,14 +216,23 @@ fun LoginScreen(navController: NavController, sharedPreferences: SharedPreferenc
                                     .apply()
                                 sharedPreferences.edit().putString("userEmail", it.data!!.email)
                                     .apply()
-                                sharedPreferences.edit().putString("userId", it.data.uid).apply()
+
+                                sharedPreferences.edit()
+                                    .putString("mechanicId", it.data!!.mechanicId)
+                                    .apply()
 
                                 navController.popBackStack()
                                 navController.popBackStack()
                                 navController.popBackStack()
 
-                                navController.navigate("MainScreen")
-
+                                if (it.data.city.equals("")) {
+                                    navController.navigate("SelectCityScreen")
+                                } else {
+                                    sharedPreferences.edit().putBoolean("isFilled", true).apply()
+                                    sharedPreferences.edit().putString("userCity", it.data.city)
+                                        .apply()
+                                    navController.navigate("MainScreen")
+                                }
 
                                 Log.d("UpdateCurrentState", "success")
                             }

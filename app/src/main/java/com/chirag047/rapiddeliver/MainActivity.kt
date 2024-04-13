@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.chirag047.rapiddeliver.Screens.ForgetPassword
 import com.chirag047.rapiddeliver.Screens.LoginScreen
 import com.chirag047.rapiddeliver.Screens.MainScreen
+import com.chirag047.rapiddeliver.Screens.SelectCityScreen
 import com.chirag047.rapiddeliver.Screens.SignUpScreen
 import com.chirag047.rapiddeliver.Screens.WelcomeScreen
 import com.chirag047.rapiddeliver.ui.theme.RapidDeliverTheme
@@ -41,8 +42,14 @@ class MainActivity : ComponentActivity() {
                     val sharedPreferences =
                         getSharedPreferences("isDataFilledPrefrence", Context.MODE_PRIVATE)
 
+                    val isFilled = sharedPreferences.getBoolean("isFilled", false)
+
                     if (auth.currentUser != null) {
-                        App("MainScreen", sharedPreferences)
+                        if(isFilled){
+                            App("MainScreen", sharedPreferences)
+                        }else{
+                            App("SelectCityScreen", sharedPreferences)
+                        }
                     } else {
                         App("WelcomeScreen", sharedPreferences)
                     }
@@ -71,6 +78,9 @@ class MainActivity : ComponentActivity() {
 
             composable(route = "MainScreen") {
                 MainScreen(navController, sharedPreferences)
+            }
+            composable(route = "SelectCityScreen") {
+                SelectCityScreen(navController, sharedPreferences)
             }
         }
     }
