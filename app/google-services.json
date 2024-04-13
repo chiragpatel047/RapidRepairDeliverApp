@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "251900659054",
+    "project_id": "rapid-repair-721ed",
+    "storage_bucket": "rapid-repair-721ed.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251900659054:android:ab58d2742a587920d7ad7f",
+        "android_client_info": {
+          "package_name": "com.chirag047.rapiddeliver"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_uO0UNm-jLuMwmBFIeyrp0z-eDwfdEf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251900659054:android:a7a0856aa4e030cdd7ad7f",
+        "android_client_info": {
+          "package_name": "com.chirag047.rapidrepair"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_uO0UNm-jLuMwmBFIeyrp0z-eDwfdEf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251900659054:android:5a23e83dc9d5781ad7ad7f",
+        "android_client_info": {
+          "package_name": "com.chirag047.rapidservice"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_uO0UNm-jLuMwmBFIeyrp0z-eDwfdEf4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
-
 class AuthRepository @Inject constructor(
     val firebaseAuth: FirebaseAuth,
     val firebaseFirestore: FirebaseFirestore
@@ -27,7 +26,15 @@ class AuthRepository @Inject constructor(
         firebaseAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
             if (it.isSuccessful) {
                 val userModel =
-                    UserModel(firebaseAuth.currentUser!!.uid, "", userName, email, password, "", "")
+                    UserModel(
+                        firebaseAuth.currentUser!!.uid,
+                        System.currentTimeMillis().toString(),
+                        userName,
+                        email,
+                        password,
+                        "",
+                        ""
+                    )
                 firebaseFirestore.collection("mechanicUsers")
                     .document(firebaseAuth.currentUser!!.uid)
                     .set(userModel)
