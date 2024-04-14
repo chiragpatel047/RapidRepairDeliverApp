@@ -181,26 +181,8 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                                 .weight(1f)
                                 .padding(10.dp, 15.dp, 15.dp, 0.dp)
                         ) {
-                            Row() {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.id_icon),
-                                    contentDescription = "",
-                                    Modifier
-                                        .size(30.dp)
-                                        .padding(0.dp, 8.dp, 0.dp, 8.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = mechanicId.value,
-                                    fontSize = 12.sp,
-                                    modifier = Modifier
-                                        .padding(0.dp, 6.dp, 0.dp, 5.dp),
-                                    fontFamily = FontFamily(Font(R.font.poppins_medium))
-                                )
-                            }
-
                             Row(
-                                verticalAlignment = Alignment.CenterVertically
+
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.service_center),
@@ -219,6 +201,26 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                                     fontFamily = FontFamily(Font(R.font.poppins_medium))
                                 )
                             }
+
+                            Row() {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.id_icon),
+                                    contentDescription = "",
+                                    Modifier
+                                        .size(30.dp)
+                                        .padding(0.dp, 8.dp, 0.dp, 8.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = mechanicId.value,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier
+                                        .padding(0.dp, 6.dp, 0.dp, 5.dp),
+                                    fontFamily = FontFamily(Font(R.font.poppins_medium))
+                                )
+                            }
+
+
 
                             Spacer(modifier = Modifier.padding(8.dp))
 
