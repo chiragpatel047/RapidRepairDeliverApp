@@ -37,16 +37,72 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.chirag047.rapiddeliver.Common.ResponseType
+import com.chirag047.rapiddeliver.Common.SingleSerivceRequest
+import com.chirag047.rapiddeliver.Common.TrackSingle
 import com.chirag047.rapiddeliver.Components.GrayFilledSimpleButton
 import com.chirag047.rapiddeliver.Components.poppinsBoldCenterText
+import com.chirag047.rapiddeliver.Components.poppinsBoldText
 import com.chirag047.rapiddeliver.Components.textWithSeeAllText
 import com.chirag047.rapiddeliver.R
+import com.chirag047.rapiddeliver.Viewmodels.HomeScreenViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(navController: NavController, sharedPreferences: SharedPreferences) {
 
     Box(Modifier.fillMaxSize()) {
+
+        val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
+        val scope = rememberCoroutineScope()
+
+        val mechanicCity = remember {
+            mutableStateOf("...")
+        }
+
+        val mechanicId = remember {
+            mutableStateOf("...")
+        }
+
+        val mechanicName = remember {
+            mutableStateOf("...")
+        }
+
+        val mechanicStatus = remember {
+            mutableStateOf("...")
+        }
+
+        val centerName = remember {
+            mutableStateOf("...")
+        }
+
+        LaunchedEffect(key1 = Unit) {
+            scope.launch(Dispatchers.Main) {
+                homeScreenViewModel.getUserDetail().collect {
+                    when (it) {
+                        is ResponseType.Error -> {
+
+                        }
+
+                        is ResponseType.Loading -> {
+
+                        }
+
+                        is ResponseType.Success -> {
+                            mechanicCity.value = it.data!!.city
+                            mechanicId.value = it.data!!.mechanicId
+                            mechanicName.value = it.data!!.userName
+                            mechanicStatus.value = it.data!!.mechanicStatus
+                            centerName.value = it.data.centerName
+                        }
+                    }
+                }
+            }
+        }
+
         Column(Modifier.fillMaxWidth()) {
+
 
             Row(
                 modifier = Modifier
@@ -73,7 +129,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                         )
                         Spacer(modifier = Modifier.padding(2.dp))
                         Text(
-                            text = sharedPreferences.getString("userCity", "") +
+                            text = mechanicCity.value +
                                     " City, India",
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily(Font(R.font.poppins_medium)),
@@ -104,7 +160,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
 
                 Column(Modifier.fillMaxWidth()) {
                     poppinsBoldCenterText(
-                        contentText = sharedPreferences.getString("userName", "")!!,
+                        contentText = mechanicName.value,
                         size = 16.sp,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -135,7 +191,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
-                                    text = sharedPreferences.getString("mechanicId", "")!!,
+                                    text = mechanicId.value,
                                     fontSize = 12.sp,
                                     modifier = Modifier
                                         .padding(0.dp, 6.dp, 0.dp, 5.dp),
@@ -147,7 +203,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.clock),
+                                    painter = painterResource(id = R.drawable.service_center),
                                     contentDescription = "",
                                     Modifier
                                         .size(30.dp)
@@ -156,7 +212,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                                 )
 
                                 Text(
-                                    text = "8AM - 10PM",
+                                    text = centerName.value,
                                     fontSize = 12.sp,
                                     modifier = Modifier
                                         .padding(0.dp, 6.dp, 0.dp, 5.dp),
@@ -177,7 +233,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                                 .padding(0.dp, 0.dp, 10.dp, 0.dp)
                         ) {
                             Text(
-                                text = "Available",
+                                text = mechanicStatus.value,
                                 fontSize = 12.sp,
                                 fontFamily = FontFamily(Font(R.font.poppins_medium)),
                             )
@@ -186,9 +242,27 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                 }
             }
 
-            textWithSeeAllText(title = "Service Request list") {
-                navController.navigate("ServiceRequestListScreen")
+            Spacer(modifier = Modifier.padding(4.dp))
+            poppinsBoldText(
+                contentText = "Current live request",
+                size = 16.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(15.dp, 5.dp, 15.dp, 0.dp)
+            )
+
+            Spacer(modifier = Modifier.padding(2.dp))
+
+            TrackSingle("Gotham Car Reparation", "Car | Toyata | Innova | Petrol") {
+                navController.navigate("TrackNowScreen")
             }
+
+            Spacer(modifier = Modifier.padding(6.dp))
+
+            textWithSeeAllText(title = "Pending requests") {
+
+            }
+            Spacer(modifier = Modifier.padding(6.dp))
 
         }
     }

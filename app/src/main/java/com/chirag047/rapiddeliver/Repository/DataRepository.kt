@@ -1,6 +1,7 @@
 package com.chirag047.rapiddeliver.Repository
 
 import com.chirag047.rapiddeliver.Common.ResponseType
+import com.chirag047.rapiddeliver.Model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
@@ -21,6 +22,21 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
                         trySend(ResponseType.Success("Added"))
                     }
                 }
+            awaitClose {
+                close()
+            }
+        }
+
+    suspend fun getUserDetail(): Flow<ResponseType<UserModel?>> =
+        callbackFlow {
+            trySend(ResponseType.Loading())
+
+            firestore.collection("mechanicUsers")
+                .document(auth.currentUser!!.uid)
+                .addSnapshotListener { value, error ->
+                    trySend(ResponseType.Success(value!!.toObject(UserModel::class.java)))
+                }
+
             awaitClose {
                 close()
             }

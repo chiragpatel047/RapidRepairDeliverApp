@@ -69,7 +69,7 @@ fun textWithSeeAllText(title: String, onClick: () -> Unit) {
         Text(
             text = title,
             textAlign = TextAlign.Start,
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily(Font(R.font.poppins_medium))

@@ -29,6 +29,8 @@ class AuthRepository @Inject constructor(
                     UserModel(
                         firebaseAuth.currentUser!!.uid,
                         System.currentTimeMillis().toString(),
+                        "",
+                        "Not joined yet",
                         userName,
                         email,
                         password,
