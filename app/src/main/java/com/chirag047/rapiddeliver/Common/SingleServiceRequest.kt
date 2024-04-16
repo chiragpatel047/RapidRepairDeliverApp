@@ -66,6 +66,9 @@ fun SingleSerivceRequest(orderModel: OrderModel, navController: NavController) {
             .padding(15.dp, 7.dp)
             .clip(RoundedCornerShape(25.dp))
             .background(MaterialTheme.colorScheme.secondaryContainer)
+            .clickable {
+                navController.navigate("ClientIssueDetailScreen" + "/${orderModel.orderId}" + "/${orderModel.userId}" + "/${orderModel.corporateId}" + "/${orderModel.corporateName}" + "/${orderModel.corporateAddress}" + "/${orderModel.vehicleOwner}" + "/${orderModel.vehicleType}" + "/${orderModel.vehicleCompany}" + "/${orderModel.vehicleModel}" + "/${orderModel.vehicleFuelType}" + "/${orderModel.vehicleLicensePlate}" + "/${orderModel.serviceType}" + "/${orderModel.clientAddress}" + "/${orderModel.clientLatitude}" + "/${orderModel.clientLongitude}" + "/${orderModel.clientAddedText}")
+            }
     ) {
 
         Row(
@@ -122,44 +125,15 @@ fun SingleSerivceRequest(orderModel: OrderModel, navController: NavController) {
             Modifier
                 .fillMaxWidth()
                 .padding(15.dp, 5.dp, 15.dp, 15.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.End
         ) {
-            Row() {
-                Row(
-                    modifier = Modifier.border(
-                        1.dp, MaterialTheme.colorScheme.onBackground,
-                        RoundedCornerShape(25.dp)
-                    )
-                ) {
-                    Text(
-                        text = "Decline",
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontFamily = FontFamily(Font(R.font.poppins_medium)),
-                        modifier = Modifier.padding(15.dp, 5.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.padding(2.dp))
-                Row(
-                    modifier = Modifier.border(
-                        1.dp, MaterialTheme.colorScheme.primary,
-                        RoundedCornerShape(25.dp)
-                    )
-                ) {
-                    Text(
-                        text = "Accept",
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontFamily = FontFamily(Font(R.font.poppins_medium)),
-                        modifier = Modifier.padding(15.dp, 5.dp)
-                    )
-                }
-            }
 
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(25.dp))
-                    .background(MaterialTheme.colorScheme.primary)
+                    .border(
+                        1.dp, MaterialTheme.colorScheme.primary,
+                        RoundedCornerShape(25.dp)
+                    )
                     .clickable {
                         navController.navigate("ClientIssueDetailScreen" + "/${orderModel.orderId}" + "/${orderModel.userId}" + "/${orderModel.corporateId}" + "/${orderModel.corporateName}" + "/${orderModel.corporateAddress}" + "/${orderModel.vehicleOwner}" + "/${orderModel.vehicleType}" + "/${orderModel.vehicleCompany}" + "/${orderModel.vehicleModel}" + "/${orderModel.vehicleFuelType}" + "/${orderModel.vehicleLicensePlate}" + "/${orderModel.serviceType}" + "/${orderModel.clientAddress}" + "/${orderModel.clientLatitude}" + "/${orderModel.clientLongitude}" + "/${orderModel.clientAddedText}")
                     }
@@ -167,11 +141,28 @@ fun SingleSerivceRequest(orderModel: OrderModel, navController: NavController) {
                 Text(
                     text = "Details",
                     fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontFamily = FontFamily(Font(R.font.poppins_medium)),
+                    modifier = Modifier.padding(15.dp, 5.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.padding(4.dp))
+
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(25.dp))
+                    .background(MaterialTheme.colorScheme.primary)
+            ) {
+                Text(
+                    text = "Start now",
+                    fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onPrimary,
                     fontFamily = FontFamily(Font(R.font.poppins_medium)),
                     modifier = Modifier.padding(15.dp, 5.dp)
                 )
             }
+
         }
     }
 }

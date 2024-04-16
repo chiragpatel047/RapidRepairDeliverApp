@@ -1,6 +1,7 @@
 package com.chirag047.rapiddeliver.Repository
 
 import com.chirag047.rapiddeliver.Common.ResponseType
+import com.chirag047.rapiddeliver.Model.OrderModel
 import com.chirag047.rapiddeliver.Model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -35,6 +36,23 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
                 .document(auth.currentUser!!.uid)
                 .addSnapshotListener { value, error ->
                     trySend(ResponseType.Success(value!!.toObject(UserModel::class.java)))
+                }
+
+            awaitClose {
+                close()
+            }
+        }
+
+
+    suspend fun getPendingRequest(mechanicId: String): Flow<ResponseType<List<OrderModel>>> =
+        callbackFlow {
+            trySend(ResponseType.Loading())
+
+            firestore.collection("orders")
+                .whereEqualTo("mechanicId", mechanicId)
+                .whereEqualTo("orderStatus", "Mechanic Pending")
+                .addSnapshotListener { value, error ->
+                    trySend(ResponseType.Success(value!!.toObjects(OrderModel::class.java)))
                 }
 
             awaitClose {

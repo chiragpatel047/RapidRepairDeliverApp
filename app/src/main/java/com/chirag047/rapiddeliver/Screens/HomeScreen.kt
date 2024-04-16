@@ -44,6 +44,7 @@ import com.chirag047.rapiddeliver.Components.GrayFilledSimpleButton
 import com.chirag047.rapiddeliver.Components.poppinsBoldCenterText
 import com.chirag047.rapiddeliver.Components.poppinsBoldText
 import com.chirag047.rapiddeliver.Components.textWithSeeAllText
+import com.chirag047.rapiddeliver.Model.OrderModel
 import com.chirag047.rapiddeliver.R
 import com.chirag047.rapiddeliver.Viewmodels.HomeScreenViewModel
 import kotlinx.coroutines.Dispatchers
@@ -56,6 +57,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
 
         val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
         val scope = rememberCoroutineScope()
+        val scroll = rememberScrollState()
 
         val mechanicCity = remember {
             mutableStateOf("...")
@@ -75,6 +77,10 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
 
         val centerName = remember {
             mutableStateOf("...")
+        }
+
+        val pendingOrdersList = remember {
+            mutableStateOf(mutableListOf(OrderModel()))
         }
 
         LaunchedEffect(key1 = Unit) {
@@ -101,8 +107,10 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
             }
         }
 
-        Column(Modifier.fillMaxWidth()) {
-
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(scroll)) {
 
             Row(
                 modifier = Modifier
@@ -182,7 +190,6 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                                 .padding(10.dp, 15.dp, 15.dp, 0.dp)
                         ) {
                             Row(
-
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.service_center),
@@ -264,8 +271,48 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
             textWithSeeAllText(title = "Pending requests") {
 
             }
-            Spacer(modifier = Modifier.padding(6.dp))
+
+            LaunchedEffect(key1 = Unit) {
+                scope.launch(Dispatchers.Main) {
+
+                    val mechanicId = sharedPreferences.getString("mechanicId", "")!!
+
+                    homeScreenViewModel.getPendingRequest(mechanicId).collect {
+                        when (it) {
+                            is ResponseType.Error -> {
+
+                            }
+
+                            is ResponseType.Loading -> {
+
+                            }
+
+                            is ResponseType.Success -> {
+
+                                val list = mutableListOf(OrderModel())
+                                list.clear()
+                                list.addAll(it.data!!)
+                                pendingOrdersList.value = list
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            loadPendingRequests(list = pendingOrdersList.value, navController = navController)
 
         }
+    }
+}
+
+@Composable
+fun loadPendingRequests(list: List<OrderModel>, navController: NavController) {
+
+    list.forEach {
+        SingleSerivceRequest(
+            it,
+            navController
+        )
     }
 }

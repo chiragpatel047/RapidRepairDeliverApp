@@ -15,6 +15,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.chirag047.rapiddeliver.Screens.ClientIssueDetailScreen
+import com.chirag047.rapiddeliver.Screens.ClientLocationScreen
 import com.chirag047.rapiddeliver.Screens.ForgetPassword
 import com.chirag047.rapiddeliver.Screens.LoginScreen
 import com.chirag047.rapiddeliver.Screens.MainScreen
@@ -45,9 +47,9 @@ class MainActivity : ComponentActivity() {
                     val isFilled = sharedPreferences.getBoolean("isFilled", false)
 
                     if (auth.currentUser != null) {
-                        if(isFilled){
+                        if (isFilled) {
                             App("MainScreen", sharedPreferences)
-                        }else{
+                        } else {
                             App("SelectCityScreen", sharedPreferences)
                         }
                     } else {
@@ -81,6 +83,57 @@ class MainActivity : ComponentActivity() {
             }
             composable(route = "SelectCityScreen") {
                 SelectCityScreen(navController, sharedPreferences)
+            }
+
+            composable(route = "ClientIssueDetailScreen" + "/{orderId}/{userId}/{corporateId}/{corporateName}/{corporateAddress}/{vehicleOwner}/{vehicleType}/{vehicleCompany}/{vehicleModel}/{vehicleFuelType}/{vehicleLicensePlate}/{serviceType}/{clientAddress}/{clientLatitude}/{clientLongitude}/{clientAddedText}") {
+
+                val orderId = it.arguments?.getString("orderId")!!
+                val userId = it.arguments?.getString("userId")!!
+                val corporateId = it.arguments?.getString("corporateId")!!
+                val corporateName = it.arguments?.getString("corporateName")!!
+                val corporateAddress = it.arguments?.getString("corporateAddress")!!
+                val serviceType = it.arguments?.getString("serviceType")!!
+                val vehicleOwner = it.arguments?.getString("vehicleOwner")!!
+                val vehicleType = it.arguments?.getString("vehicleType")!!
+                val vehicleCompany = it.arguments?.getString("vehicleCompany")!!
+                val vehicleModel = it.arguments?.getString("vehicleModel")!!
+                val vehicleFuelType = it.arguments?.getString("vehicleFuelType")!!
+                val vehicleLicensePlate = it.arguments?.getString("vehicleLicensePlate")!!
+                val clientAddress = it.arguments?.getString("clientAddress")!!
+                val clientLatitude = it.arguments?.getString("clientLatitude")!!
+                val clientLongitude = it.arguments?.getString("clientLongitude")!!
+                val clientAddedText = it.arguments?.getString("clientAddedText")!!
+
+                ClientIssueDetailScreen(
+                    navController,
+                    orderId,
+                    userId,
+                    corporateId,
+                    corporateName,
+                    corporateAddress,
+                    serviceType,
+                    vehicleOwner,
+                    vehicleType,
+                    vehicleCompany,
+                    vehicleModel,
+                    vehicleFuelType,
+                    vehicleLicensePlate,
+                    clientAddress,
+                    clientLatitude,
+                    clientLongitude,
+                    clientAddedText
+                )
+            }
+
+            composable(route = "ClientLocationScreen" + "/{clientLatitude}/{clientLongitude}") {
+
+                val clientLatitude = it.arguments?.getString("clientLatitude")!!
+                val clientLongitude = it.arguments?.getString("clientLongitude")!!
+
+                ClientLocationScreen(
+                    navController, clientLatitude,
+                    clientLongitude
+                )
             }
         }
     }
