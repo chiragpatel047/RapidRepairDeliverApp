@@ -39,7 +39,7 @@ import com.chirag047.rapiddeliver.R
 fun MainScreen(navController: NavController, sharedPreferences: SharedPreferences) {
     val list = listOf(
         NavigationItem.HomeNav,
-        NavigationItem.TrackNav,
+        NavigationItem.HistoryNav,
         NavigationItem.ProfileNav
     )
 
@@ -127,8 +127,8 @@ fun navApp(
         composable(route = "HomeScreen") {
             HomeScreen(navController, sharedPreferences)
         }
-        composable(route = "TrackScreen") {
-            TrackScreen(navController)
+        composable(route = "HistoryScreen") {
+            HistoryScreen(navController, sharedPreferences)
         }
 
         composable(route = "ProfileScreen") {

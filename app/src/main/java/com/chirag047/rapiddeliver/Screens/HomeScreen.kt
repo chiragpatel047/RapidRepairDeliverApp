@@ -295,7 +295,6 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                                 list.clear()
                                 list.addAll(it.data!!)
                                 liveOrdersList.value = list
-
                             }
                         }
                     }
