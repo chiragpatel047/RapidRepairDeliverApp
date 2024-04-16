@@ -44,7 +44,12 @@ import com.chirag047.rapiddeliver.Model.OrderModel
 import com.chirag047.rapiddeliver.R
 
 @Composable
-fun SingleSerivceRequest(orderModel: OrderModel, navController: NavController) {
+fun SingleSerivceRequest(
+    orderModel: OrderModel,
+    navController: NavController,
+    mechanicStatus: String,
+    startMechanicService: () -> Unit
+) {
 
     var icon = R.drawable.car_icon
 
@@ -80,7 +85,6 @@ fun SingleSerivceRequest(orderModel: OrderModel, navController: NavController) {
                     .clip(RoundedCornerShape(10.dp)),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
-
             ) {
                 Spacer(modifier = Modifier.padding(4.dp))
                 Box(
@@ -135,7 +139,7 @@ fun SingleSerivceRequest(orderModel: OrderModel, navController: NavController) {
                         RoundedCornerShape(25.dp)
                     )
                     .clickable {
-                        navController.navigate("ClientIssueDetailScreen" + "/${orderModel.orderId}" + "/${orderModel.userId}" + "/${orderModel.corporateId}" + "/${orderModel.corporateName}" + "/${orderModel.corporateAddress}" + "/${orderModel.vehicleOwner}" + "/${orderModel.vehicleType}" + "/${orderModel.vehicleCompany}" + "/${orderModel.vehicleModel}" + "/${orderModel.vehicleFuelType}" + "/${orderModel.vehicleLicensePlate}" + "/${orderModel.serviceType}" + "/${orderModel.clientAddress}" + "/${orderModel.clientLatitude}" + "/${orderModel.clientLongitude}" + "/${orderModel.clientAddedText}")
+                        navController.navigate("ClientIssueDetailScreen" + "/${orderModel.orderId}" + "/${orderModel.userId}" + "/${orderModel.corporateId}" + "/${orderModel.corporateName}" + "/${orderModel.corporateAddress}" + "/${orderModel.vehicleOwner}" + "/${orderModel.vehicleType}" + "/${orderModel.vehicleCompany}" + "/${orderModel.vehicleModel}" + "/${orderModel.vehicleFuelType}" + "/${orderModel.vehicleLicensePlate}" + "/${orderModel.serviceType}" + "/${orderModel.clientAddress}" + "/${orderModel.clientLatitude}" + "/${orderModel.clientLongitude}" + "/${orderModel.clientAddedText}" + "/$mechanicStatus")
                     }
             ) {
                 Text(
@@ -152,17 +156,21 @@ fun SingleSerivceRequest(orderModel: OrderModel, navController: NavController) {
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(25.dp))
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(if (mechanicStatus.equals("Available")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                    .clickable {
+                        if (mechanicStatus.equals("Available")) {
+                            startMechanicService.invoke()
+                        }
+                    }
             ) {
                 Text(
                     text = "Start now",
                     fontSize = 10.sp,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = if (mechanicStatus.equals("Available")) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary,
                     fontFamily = FontFamily(Font(R.font.poppins_medium)),
                     modifier = Modifier.padding(15.dp, 5.dp)
                 )
             }
-
         }
     }
 }

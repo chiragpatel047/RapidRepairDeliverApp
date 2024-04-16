@@ -10,4 +10,9 @@ class HomeScreenViewModel @Inject constructor(val dataRepository: DataRepository
 
     suspend fun getUserDetail() = dataRepository.getUserDetail()
     suspend fun getPendingRequest(mechanicId: String) = dataRepository.getPendingRequest(mechanicId)
+
+    suspend fun startMechanicService(orderId: String) =
+        dataRepository.startMechanicService(orderId)
+
+    suspend fun getLiveRequest(mechanicId: String) = dataRepository.getLiveRequest(mechanicId)
 }

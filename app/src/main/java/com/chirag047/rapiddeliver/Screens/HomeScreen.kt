@@ -37,10 +37,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.chirag047.rapiddeliver.Common.NoDataText
 import com.chirag047.rapiddeliver.Common.ResponseType
 import com.chirag047.rapiddeliver.Common.SingleSerivceRequest
 import com.chirag047.rapiddeliver.Common.TrackSingle
 import com.chirag047.rapiddeliver.Components.GrayFilledSimpleButton
+import com.chirag047.rapiddeliver.Components.SnackbarWithoutScaffold
+import com.chirag047.rapiddeliver.Components.customProgressBar
 import com.chirag047.rapiddeliver.Components.poppinsBoldCenterText
 import com.chirag047.rapiddeliver.Components.poppinsBoldText
 import com.chirag047.rapiddeliver.Components.textWithSeeAllText
@@ -58,6 +61,14 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
         val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
         val scope = rememberCoroutineScope()
         val scroll = rememberScrollState()
+
+        val showProgressBar = remember {
+            mutableStateOf(false)
+        }
+
+        var openMySnackbar = remember { mutableStateOf(false) }
+        var snackBarMsg = remember { mutableStateOf("") }
+
 
         val mechanicCity = remember {
             mutableStateOf("...")
@@ -80,6 +91,10 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
         }
 
         val pendingOrdersList = remember {
+            mutableStateOf(mutableListOf(OrderModel()))
+        }
+
+        val liveOrdersList = remember {
             mutableStateOf(mutableListOf(OrderModel()))
         }
 
@@ -110,7 +125,8 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
         Column(
             Modifier
                 .fillMaxWidth()
-                .verticalScroll(scroll)) {
+                .verticalScroll(scroll)
+        ) {
 
             Row(
                 modifier = Modifier
@@ -227,8 +243,6 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                                 )
                             }
 
-
-
                             Spacer(modifier = Modifier.padding(8.dp))
 
                         }
@@ -237,7 +251,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                             onClick = {
 
                             },
-                            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                            colors = ButtonDefaults.buttonColors(if (mechanicStatus.value.equals("Available")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary),
                             modifier = Modifier
                                 .padding(0.dp, 0.dp, 10.dp, 0.dp)
                         ) {
@@ -262,9 +276,34 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
 
             Spacer(modifier = Modifier.padding(2.dp))
 
-            TrackSingle("Gotham Car Reparation", "Car | Toyata | Innova | Petrol") {
-                navController.navigate("TrackNowScreen")
+            val mechanicId = sharedPreferences.getString("mechanicId", "")!!
+
+            LaunchedEffect(key1 = Unit) {
+                scope.launch(Dispatchers.Main) {
+                    homeScreenViewModel.getLiveRequest(mechanicId).collect {
+                        when (it) {
+                            is ResponseType.Error -> {
+
+                            }
+
+                            is ResponseType.Loading -> {
+
+                            }
+
+                            is ResponseType.Success -> {
+                                val list = mutableListOf(OrderModel())
+                                list.clear()
+                                list.addAll(it.data!!)
+                                liveOrdersList.value = list
+
+                            }
+                        }
+                    }
+                }
             }
+
+            NoDataText("No Live request", liveOrdersList.value.size.equals(0))
+            loadLiveRequests(liveOrdersList.value, navController)
 
             Spacer(modifier = Modifier.padding(6.dp))
 
@@ -274,8 +313,6 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
 
             LaunchedEffect(key1 = Unit) {
                 scope.launch(Dispatchers.Main) {
-
-                    val mechanicId = sharedPreferences.getString("mechanicId", "")!!
 
                     homeScreenViewModel.getPendingRequest(mechanicId).collect {
                         when (it) {
@@ -300,19 +337,73 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                 }
             }
 
-            loadPendingRequests(list = pendingOrdersList.value, navController = navController)
+            NoDataText("No pending request", pendingOrdersList.value.size.equals(0))
 
+            loadPendingRequests(
+                list = pendingOrdersList.value,
+                navController = navController,
+                homeScreenViewModel,
+                mechanicStatus.value
+            )
+
+        }
+        customProgressBar(show = showProgressBar.value, title = "Wait a moment...")
+
+        SnackbarWithoutScaffold(
+            snackBarMsg.value, openMySnackbar.value, { openMySnackbar.value = it }, Modifier.align(
+                Alignment.BottomCenter
+            )
+        )
+    }
+}
+
+@Composable
+fun loadPendingRequests(
+    list: List<OrderModel>,
+    navController: NavController,
+    homeScreenViewModel: HomeScreenViewModel,
+    mechanicStatus: String
+
+) {
+    val scope = rememberCoroutineScope()
+
+    list.forEach {
+        SingleSerivceRequest(
+            it,
+            navController,
+            mechanicStatus
+        ) {
+            if (mechanicStatus.equals("Available")) {
+                scope.launch(Dispatchers.Main) {
+                    homeScreenViewModel.startMechanicService(it.orderId).collect {
+                        when (it) {
+                            is ResponseType.Error -> {
+
+                            }
+
+                            is ResponseType.Loading -> {
+
+                            }
+
+                            is ResponseType.Success -> {
+
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun loadPendingRequests(list: List<OrderModel>, navController: NavController) {
-
+fun loadLiveRequests(list: List<OrderModel>, navController: NavController) {
     list.forEach {
-        SingleSerivceRequest(
-            it,
-            navController
-        )
+        TrackSingle(
+            it.vehicleOwner,
+            it.vehicleCompany + " " + it.vehicleModel + " | " + it.vehicleFuelType
+        ) {
+            navController.navigate("TrackNowScreen")
+        }
     }
 }

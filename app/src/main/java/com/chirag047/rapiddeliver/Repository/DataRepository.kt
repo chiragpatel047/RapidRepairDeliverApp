@@ -60,4 +60,50 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
             }
         }
 
+
+    suspend fun getLiveRequest(mechanicId: String): Flow<ResponseType<List<OrderModel>>> =
+        callbackFlow {
+
+            trySend(ResponseType.Loading())
+
+            firestore.collection("orders")
+                .whereEqualTo("mechanicId", mechanicId)
+                .whereEqualTo("orderStatus", "Live")
+                .addSnapshotListener { value, error ->
+                    trySend(ResponseType.Success(value!!.toObjects(OrderModel::class.java)))
+                }
+
+            awaitClose {
+                close()
+            }
+        }
+
+
+    suspend fun startMechanicService(orderId: String): Flow<ResponseType<String>> =
+        callbackFlow {
+            trySend(ResponseType.Loading())
+
+            firestore.collection("orders")
+                .document(orderId)
+                .update("orderStatus", "Live")
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        firestore.collection("mechanicUsers")
+                            .document(auth.currentUser!!.uid)
+                            .update("mechanicStatus", "On service")
+                            .addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    trySend(ResponseType.Success("Started now"))
+                                }
+                            }
+                    } else {
+                        trySend(ResponseType.Error("Something went wrong"))
+                    }
+                }
+
+            awaitClose {
+                close()
+            }
+        }
+
 }

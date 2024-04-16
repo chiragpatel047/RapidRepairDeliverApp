@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
                 SelectCityScreen(navController, sharedPreferences)
             }
 
-            composable(route = "ClientIssueDetailScreen" + "/{orderId}/{userId}/{corporateId}/{corporateName}/{corporateAddress}/{vehicleOwner}/{vehicleType}/{vehicleCompany}/{vehicleModel}/{vehicleFuelType}/{vehicleLicensePlate}/{serviceType}/{clientAddress}/{clientLatitude}/{clientLongitude}/{clientAddedText}") {
+            composable(route = "ClientIssueDetailScreen" + "/{orderId}/{userId}/{corporateId}/{corporateName}/{corporateAddress}/{vehicleOwner}/{vehicleType}/{vehicleCompany}/{vehicleModel}/{vehicleFuelType}/{vehicleLicensePlate}/{serviceType}/{clientAddress}/{clientLatitude}/{clientLongitude}/{clientAddedText}/{mechanicStatus}") {
 
                 val orderId = it.arguments?.getString("orderId")!!
                 val userId = it.arguments?.getString("userId")!!
@@ -103,9 +103,11 @@ class MainActivity : ComponentActivity() {
                 val clientLatitude = it.arguments?.getString("clientLatitude")!!
                 val clientLongitude = it.arguments?.getString("clientLongitude")!!
                 val clientAddedText = it.arguments?.getString("clientAddedText")!!
+                val mechanicStatus = it.arguments?.getString("mechanicStatus")!!
 
                 ClientIssueDetailScreen(
                     navController,
+                    sharedPreferences,
                     orderId,
                     userId,
                     corporateId,
@@ -121,7 +123,8 @@ class MainActivity : ComponentActivity() {
                     clientAddress,
                     clientLatitude,
                     clientLongitude,
-                    clientAddedText
+                    clientAddedText,
+                    mechanicStatus
                 )
             }
 

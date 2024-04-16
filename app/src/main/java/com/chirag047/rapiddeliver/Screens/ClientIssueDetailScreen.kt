@@ -1,5 +1,6 @@
 package com.chirag047.rapiddeliver.Screens
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,14 +30,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.chirag047.rapiddeliver.Common.ResponseType
 import com.chirag047.rapiddeliver.Components.ActionBarWIthBack
 import com.chirag047.rapiddeliver.Components.poppinsBoldText
 import com.chirag047.rapiddeliver.R
+import com.chirag047.rapiddeliver.Viewmodels.ClientIssueDetailViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun ClientIssueDetailScreen(
     navController: NavController,
+    sharedPreferences: SharedPreferences,
     orderId: String,
     userId: String,
     corporateId: String,
@@ -51,10 +59,15 @@ fun ClientIssueDetailScreen(
     clientAddress: String,
     clientLatitude: String,
     clientLongitude: String,
-    clientAddedText: String
+    clientAddedText: String,
+    mechanicStatus: String
 ) {
     Box(Modifier.fillMaxSize()) {
+
         val scroll = rememberScrollState()
+        val clientIssueDetailViewModel: ClientIssueDetailViewModel = hiltViewModel()
+        val scope = rememberCoroutineScope()
+
         Column(Modifier.fillMaxWidth()) {
             ActionBarWIthBack(title = "Client Issue details")
             Column(
@@ -237,9 +250,36 @@ fun ClientIssueDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(25.dp))
-                            .background(MaterialTheme.colorScheme.primary)
+                            .background(if (mechanicStatus.equals("Available")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
                             .weight(1f)
                             .clickable {
+
+                                if (mechanicStatus.equals("Available")) {
+                                    scope.launch(Dispatchers.Main) {
+
+                                        val mechanicId =
+                                            sharedPreferences.getString("mechanicId", "")!!
+
+                                        clientIssueDetailViewModel
+                                            .startMechanicService(mechanicId)
+                                            .collect {
+                                                when (it) {
+                                                    is ResponseType.Error -> {
+
+                                                    }
+
+                                                    is ResponseType.Loading -> {
+
+                                                    }
+
+                                                    is ResponseType.Success -> {
+
+                                                    }
+                                                }
+                                            }
+                                    }
+
+                                }
 
                             }
                     ) {
@@ -247,7 +287,7 @@ fun ClientIssueDetailScreen(
                             text = "Start now",
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = if (mechanicStatus.equals("Available")) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary,
                             fontFamily = FontFamily(Font(R.font.poppins_medium)),
                             modifier = Modifier
                                 .padding(15.dp, 15.dp)
