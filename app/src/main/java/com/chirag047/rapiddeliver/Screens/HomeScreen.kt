@@ -62,13 +62,19 @@ import com.chirag047.rapiddeliver.Components.poppinsBoldText
 import com.chirag047.rapiddeliver.Components.textWithSeeAllText
 import com.chirag047.rapiddeliver.Model.OrderModel
 import com.chirag047.rapiddeliver.R
+import com.chirag047.rapiddeliver.Services.LocationService
 import com.chirag047.rapiddeliver.Viewmodels.HomeScreenViewModel
+import com.chirag047.rapiddeliver.Viewmodels.TrackNowScreenViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreen(navController: NavController, sharedPreferences: SharedPreferences) {
+fun HomeScreen(
+    navController: NavController,
+    sharedPreferences: SharedPreferences,
+    context: Context
+) {
 
     Box(Modifier.fillMaxSize()) {
 
@@ -343,7 +349,7 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
             Spacer(modifier = Modifier.padding(2.dp))
 
             NoDataText("No Live request", liveOrdersList.size.equals(0))
-            loadLiveRequests(liveOrdersList, navController)
+            loadLiveRequests(liveOrdersList, navController, context, homeScreenViewModel)
 
             Spacer(modifier = Modifier.padding(6.dp))
 
@@ -358,7 +364,9 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                 list = pendingOrdersList,
                 navController = navController,
                 homeScreenViewModel,
-                mechanicStatus.value
+                mechanicStatus.value,
+                context,
+                sharedPreferences
             )
 
         }
@@ -377,7 +385,9 @@ fun loadPendingRequests(
     list: List<OrderModel>,
     navController: NavController,
     homeScreenViewModel: HomeScreenViewModel,
-    mechanicStatus: String
+    mechanicStatus: String,
+    context: Context,
+    sharedPreferences: SharedPreferences
 ) {
     val scope = rememberCoroutineScope()
 
@@ -389,6 +399,8 @@ fun loadPendingRequests(
         ) {
             if (mechanicStatus.equals("Available")) {
 
+                var service = Intent(context, LocationService()::class.java)
+                service.putExtra("orderId", it.orderId)
 
                 scope.launch(Dispatchers.Main) {
                     homeScreenViewModel.startMechanicService(it.orderId).collect {
@@ -402,7 +414,7 @@ fun loadPendingRequests(
                             }
 
                             is ResponseType.Success -> {
-
+                                context.startService(service)
                             }
                         }
                     }
@@ -413,13 +425,26 @@ fun loadPendingRequests(
 }
 
 @Composable
-fun loadLiveRequests(list: List<OrderModel>, navController: NavController) {
+fun loadLiveRequests(
+    list: List<OrderModel>,
+    navController: NavController,
+    context: Context,
+    homeScreenViewModel: HomeScreenViewModel
+) {
     list.forEach {
         TrackSingle(
             it.vehicleOwner,
-            it.vehicleCompany + " " + it.vehicleModel + " | " + it.vehicleFuelType
+            it.vehicleCompany + " " + it.vehicleModel + " | " + it.vehicleFuelType, {
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    homeScreenViewModel.doneMechanicService(it.orderId)
+                }
+
+                var service = Intent(context, LocationService()::class.java)
+                context.stopService(service)
+            }
         ) {
-            navController.navigate("TrackNowScreen")
+            navController.navigate("TrackNowScreen" + "/${it.orderId}" + "/${it.clientAddress}" + "/${it.clientLatitude}" + "/${it.clientLongitude}")
         }
     }
 }

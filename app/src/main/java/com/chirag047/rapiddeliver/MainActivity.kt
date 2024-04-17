@@ -130,13 +130,24 @@ class MainActivity : ComponentActivity() {
             }
 
             composable(route = "MainScreen") {
-                MainScreen(navController, sharedPreferences)
+                MainScreen(navController, sharedPreferences,this@MainActivity)
             }
             composable(route = "SelectCityScreen") {
                 SelectCityScreen(navController, sharedPreferences)
             }
-            composable(route = "TrackNowScreen") {
-                TrackNowScreen(navController)
+            composable(route = "TrackNowScreen" + "/{orderId}/{clientAddress}/{clientLatitude}/{clientLongitude}") {
+
+                val orderId = it.arguments?.getString("orderId")!!
+                val clientAddress = it.arguments?.getString("clientAddress")!!
+                val clientLatitude = it.arguments?.getString("clientLatitude")!!
+                val clientLongitude = it.arguments?.getString("clientLongitude")!!
+
+                TrackNowScreen(
+                    navController, orderId, clientAddress,
+                    clientLatitude,
+                    clientLongitude,
+                    this@MainActivity
+                )
             }
 
             composable(route = "ClientIssueDetailScreen" + "/{orderId}/{userId}/{corporateId}/{corporateName}/{corporateAddress}/{vehicleOwner}/{vehicleType}/{vehicleCompany}/{vehicleModel}/{vehicleFuelType}/{vehicleLicensePlate}/{serviceType}/{clientAddress}/{clientLatitude}/{clientLongitude}/{clientAddedText}/{mechanicStatus}") {

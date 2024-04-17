@@ -1,10 +1,12 @@
 package com.chirag047.rapiddeliver.Repository
 
 import com.chirag047.rapiddeliver.Common.ResponseType
+import com.chirag047.rapiddeliver.Model.Coordinates
 import com.chirag047.rapiddeliver.Model.OrderModel
 import com.chirag047.rapiddeliver.Model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -116,6 +118,51 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
                 .whereEqualTo("orderStatus", "Done")
                 .addSnapshotListener { value, error ->
                     trySend(ResponseType.Success(value!!.toObjects(OrderModel::class.java)))
+                }
+
+            awaitClose {
+                close()
+            }
+        }
+
+
+    suspend fun trackLiveLocation(orderId: String): Flow<ResponseType<Coordinates?>> =
+        callbackFlow {
+
+            trySend(ResponseType.Loading())
+
+            firestore.collection("liveTrack")
+                .document(orderId)
+                .addSnapshotListener { value, error ->
+                    trySend(ResponseType.Success(value!!.toObject(Coordinates::class.java))!!)
+                }
+
+            awaitClose {
+                close()
+            }
+        }
+
+
+    suspend fun doneMechanicService(orderId: String): Flow<ResponseType<String>> =
+        callbackFlow {
+            trySend(ResponseType.Loading())
+
+            firestore.collection("orders")
+                .document(orderId)
+                .update("orderStatus", "Done")
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        firestore.collection("mechanicUsers")
+                            .document(auth.currentUser!!.uid)
+                            .update("mechanicStatus", "Available")
+                            .addOnCompleteListener {
+                                if (it.isSuccessful) {
+                                    trySend(ResponseType.Success("Done"))
+                                }
+                            }
+                    } else {
+                        trySend(ResponseType.Error("Something went wrong"))
+                    }
                 }
 
             awaitClose {

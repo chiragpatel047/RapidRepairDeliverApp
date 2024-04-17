@@ -1,5 +1,6 @@
 package com.chirag047.rapiddeliver.Screens
 
+import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.compose.foundation.background
@@ -36,7 +37,7 @@ import com.chirag047.rapiddeliver.Common.NavigationItem
 import com.chirag047.rapiddeliver.R
 
 @Composable
-fun MainScreen(navController: NavController, sharedPreferences: SharedPreferences) {
+fun MainScreen(navController: NavController, sharedPreferences: SharedPreferences,context: Context) {
     val list = listOf(
         NavigationItem.HomeNav,
         NavigationItem.HistoryNav,
@@ -54,7 +55,7 @@ fun MainScreen(navController: NavController, sharedPreferences: SharedPreference
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            navApp(bottomNavController, navController, sharedPreferences)
+            navApp(bottomNavController, navController, sharedPreferences, context )
         }
         bottomNavigationCustom(bottomNavController, list = list)
     }
@@ -120,12 +121,13 @@ fun bottomNavigationCustom(navController: NavController, list: List<NavigationIt
 fun navApp(
     bottomNavController: NavHostController,
     navController: NavController,
-    sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences,
+    context : Context
 ) {
 
     NavHost(navController = bottomNavController, startDestination = "HomeScreen") {
         composable(route = "HomeScreen") {
-            HomeScreen(navController, sharedPreferences)
+            HomeScreen(navController, sharedPreferences, context )
         }
 
         composable(route = "HistoryScreen") {

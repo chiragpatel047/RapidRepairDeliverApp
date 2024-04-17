@@ -1,5 +1,6 @@
 package com.chirag047.rapiddeliver.Common
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,9 +34,10 @@ import androidx.navigation.NavController
 import com.chirag047.rapiddeliver.Components.poppinsBoldText
 import com.chirag047.rapiddeliver.Components.poppinsText
 import com.chirag047.rapiddeliver.R
+import com.chirag047.rapiddeliver.Services.LocationService
 
 @Composable
-fun TrackSingle(title: String, desc: String, onclick: () -> Unit) {
+fun TrackSingle(title: String, desc: String, stop: () -> Unit, onclick: () -> Unit) {
     Row(
         Modifier
             .padding(15.dp, 7.dp)
@@ -92,14 +94,28 @@ fun TrackSingle(title: String, desc: String, onclick: () -> Unit) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 Button(
                     onClick = {
+                        stop.invoke()
+                    },
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
+                    modifier = Modifier
+                        .padding(15.dp, 10.dp,5.dp,10.dp)
+                ) {
+                    Text(
+                        text = "Completed",
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily(Font(R.font.poppins_medium))
+                    )
+                }
+                Button(
+                    onClick = {
                         onclick.invoke()
                     },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                     modifier = Modifier
-                        .padding(15.dp, 10.dp)
+                        .padding(5.dp, 10.dp,15.dp,10.dp)
                 ) {
                     Text(
-                        text = "Track now",
+                        text = "Track",
                         fontSize = 12.sp,
                         fontFamily = FontFamily(Font(R.font.poppins_medium))
                     )

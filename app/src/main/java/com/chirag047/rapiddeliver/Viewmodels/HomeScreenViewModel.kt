@@ -27,11 +27,25 @@ class HomeScreenViewModel @Inject constructor(val dataRepository: DataRepository
     val pendingRequests: StateFlow<ResponseType<List<OrderModel>>>
         get() = _pendingRequests
 
+
+    private val _doneData = MutableStateFlow<ResponseType<String>>(ResponseType.Loading())
+    val doneData: StateFlow<ResponseType<String>>
+        get() = _doneData
+
     suspend fun getUserDetail() = dataRepository.getUserDetail()
     suspend fun getPendingRequest(mechanicId: String) {
         viewModelScope.launch {
             dataRepository.getPendingRequest(mechanicId).collect {
                 _pendingRequests.emit(it)
+            }
+        }
+    }
+
+
+    suspend fun doneMechanicService(orderId: String) {
+        viewModelScope.launch {
+            dataRepository.doneMechanicService(orderId).collect {
+                _doneData.emit(it)
             }
         }
     }
