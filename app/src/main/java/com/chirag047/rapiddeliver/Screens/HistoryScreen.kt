@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,6 +45,7 @@ import com.chirag047.rapiddeliver.Components.poppinsText
 import com.chirag047.rapiddeliver.Model.OrderModel
 import com.chirag047.rapiddeliver.R
 import com.chirag047.rapiddeliver.Viewmodels.HistoryScreenViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -54,11 +56,12 @@ fun HistoryScreen(navController: NavController, sharedPreferences: SharedPrefere
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxWidth()) {
             val doneOrdersList = remember {
-                mutableStateOf(mutableListOf(OrderModel()))
+                mutableListOf<OrderModel>()
             }
 
             val scope = rememberCoroutineScope()
             val historyScreenViewModel: HistoryScreenViewModel = hiltViewModel()
+            val historyRequestState = historyScreenViewModel.historyRequests.collectAsState()
 
             poppinsBoldCenterText(
                 contentText = "History",
@@ -80,109 +83,106 @@ fun HistoryScreen(navController: NavController, sharedPreferences: SharedPrefere
                 val mechanicId = sharedPreferences.getString("mechanicId", "")!!
 
                 LaunchedEffect(key1 = Unit) {
-                    scope.launch(Dispatchers.Main) {
-                        historyScreenViewModel.getMyOrdersRequest(mechanicId).collect {
-                            when (it) {
-                                is ResponseType.Error -> {
-
-                                }
-
-                                is ResponseType.Loading -> {
-
-                                }
-
-                                is ResponseType.Success -> {
-                                    val list = mutableListOf(OrderModel())
-                                    list.clear()
-                                    list.addAll(it.data!!)
-                                    doneOrdersList.value = list
-
-                                }
-                            }
-                        }
+                    CoroutineScope(Dispatchers.IO).launch {
+                        historyScreenViewModel.getMyOrdersRequest(mechanicId)
                     }
                 }
 
-                NoDataText("No history", doneOrdersList.value.size.equals(0))
-                loadLiveRequests(doneOrdersList.value, navController)
+                when (historyRequestState.value) {
+                    is ResponseType.Error -> {
 
+                    }
+
+                    is ResponseType.Loading -> {
+
+                    }
+
+                    is ResponseType.Success -> {
+                        doneOrdersList.clear()
+                        doneOrdersList.addAll(historyRequestState.value.data!!)
+
+                    }
+                }
+
+                NoDataText("No history", doneOrdersList.size.equals(0))
+                loadDoneRequests(doneOrdersList, navController)
 
             }
         }
     }
+}
 
-    @Composable
-    fun TrackHistorySingle(title: String, desc: String) {
-        Row(
+
+@Composable
+fun TrackHistorySingle(title: String, desc: String) {
+    Row(
+        Modifier
+            .padding(15.dp, 7.dp)
+            .clip(RoundedCornerShape(25.dp))
+            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .clickable {
+
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Column(
             Modifier
-                .padding(15.dp, 7.dp)
-                .clip(RoundedCornerShape(25.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer)
-                .clickable {
+                .padding(15.dp, 0.dp, 7.dp, 0.dp)
+                .clip(RoundedCornerShape(10.dp))
 
-                },
-            verticalAlignment = Alignment.CenterVertically
         ) {
-
-            Column(
-                Modifier
-                    .padding(15.dp, 0.dp, 7.dp, 0.dp)
-                    .clip(RoundedCornerShape(10.dp))
-
+            Spacer(modifier = Modifier.padding(10.dp))
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .padding(5.dp)
+                    .clip(RoundedCornerShape(50.dp))
+                    .background(MaterialTheme.colorScheme.secondary),
             ) {
-                Spacer(modifier = Modifier.padding(10.dp))
-                Box(
+                Icon(
+                    painterResource(id = R.drawable.history),
+                    contentDescription = "",
+                    tint = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier
                         .size(50.dp)
-                        .padding(5.dp)
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(MaterialTheme.colorScheme.secondary),
-                ) {
-                    Icon(
-                        painterResource(id = R.drawable.history),
-                        contentDescription = "",
-                        tint = MaterialTheme.colorScheme.onSecondary,
-                        modifier = Modifier
-                            .size(50.dp)
-                            .padding(10.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.padding(10.dp))
-            }
-
-            Column(Modifier.fillMaxWidth()) {
-                Spacer(modifier = Modifier.padding(10.dp))
-
-                poppinsBoldText(
-                    contentText = title,
-                    size = 14.sp,
-                    modifier = Modifier
-                        .padding(10.dp, 0.dp)
+                        .padding(10.dp)
                 )
-
-                poppinsText(
-                    contentText = desc,
-                    size = 12.sp,
-                    modifier = Modifier
-                        .padding(10.dp, 0.dp)
-                )
-
-                Spacer(modifier = Modifier.padding(10.dp))
-
             }
-
+            Spacer(modifier = Modifier.padding(10.dp))
         }
-    }
 
-    @Composable
-    fun loadDoneRequests(list: List<OrderModel>, navController: NavController) {
-        list.forEach {
+        Column(Modifier.fillMaxWidth()) {
+            Spacer(modifier = Modifier.padding(10.dp))
 
-            TrackHistorySingle(
-                it.corporateName,
-                it.vehicleCompany + " " + it.vehicleModel + " | " + it.vehicleFuelType
+            poppinsBoldText(
+                contentText = title,
+                size = 14.sp,
+                modifier = Modifier
+                    .padding(10.dp, 0.dp)
             )
-        }
-    }
 
+            poppinsText(
+                contentText = desc,
+                size = 12.sp,
+                modifier = Modifier
+                    .padding(10.dp, 0.dp)
+            )
+
+            Spacer(modifier = Modifier.padding(10.dp))
+
+        }
+
+    }
+}
+
+@Composable
+fun loadDoneRequests(list: List<OrderModel>, navController: NavController) {
+    list.forEach {
+
+        TrackHistorySingle(
+            it.corporateName,
+            it.vehicleCompany + " " + it.vehicleModel + " | " + it.vehicleFuelType
+        )
+    }
 }

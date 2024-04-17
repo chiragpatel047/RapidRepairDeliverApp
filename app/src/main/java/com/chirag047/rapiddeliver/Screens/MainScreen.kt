@@ -127,6 +127,7 @@ fun navApp(
         composable(route = "HomeScreen") {
             HomeScreen(navController, sharedPreferences)
         }
+
         composable(route = "HistoryScreen") {
             HistoryScreen(navController, sharedPreferences)
         }

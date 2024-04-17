@@ -1,7 +1,17 @@
 package com.chirag047.rapiddeliver.Screens
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.Context.LOCATION_SERVICE
+import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.provider.Settings
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,12 +32,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -35,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.chirag047.rapiddeliver.Common.NoDataText
@@ -50,6 +63,7 @@ import com.chirag047.rapiddeliver.Components.textWithSeeAllText
 import com.chirag047.rapiddeliver.Model.OrderModel
 import com.chirag047.rapiddeliver.R
 import com.chirag047.rapiddeliver.Viewmodels.HomeScreenViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -61,6 +75,9 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
         val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
         val scope = rememberCoroutineScope()
         val scroll = rememberScrollState()
+
+        val liveRequestState = homeScreenViewModel.liveRequests.collectAsState()
+        val pendingRequestState = homeScreenViewModel.pendingRequests.collectAsState()
 
         val showProgressBar = remember {
             mutableStateOf(false)
@@ -91,11 +108,11 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
         }
 
         val pendingOrdersList = remember {
-            mutableStateOf(mutableListOf(OrderModel()))
+            mutableListOf<OrderModel>()
         }
 
         val liveOrdersList = remember {
-            mutableStateOf(mutableListOf(OrderModel()))
+            mutableListOf<OrderModel>()
         }
 
         LaunchedEffect(key1 = Unit) {
@@ -119,6 +136,55 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
                         }
                     }
                 }
+            }
+        }
+
+        LaunchedEffect(key1 = Unit) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val mechanicId = sharedPreferences.getString("mechanicId", "")!!
+                homeScreenViewModel.getLiveRequest(mechanicId)
+                Log.d("liveOrderListLogDataRequest", "liveOrderListLogDataRequest")
+
+            }
+        }
+
+        when (liveRequestState.value) {
+            is ResponseType.Error -> {
+
+            }
+
+            is ResponseType.Loading -> {
+
+            }
+
+            is ResponseType.Success -> {
+                liveOrdersList.clear()
+                liveOrdersList.addAll(liveRequestState.value.data!!)
+            }
+        }
+
+
+        LaunchedEffect(key1 = Unit) {
+            CoroutineScope(Dispatchers.Main).launch {
+                val mechanicId = sharedPreferences.getString("mechanicId", "")!!
+                homeScreenViewModel.getPendingRequest(mechanicId)
+            }
+        }
+
+        when (pendingRequestState.value) {
+            is ResponseType.Error -> {
+
+            }
+
+            is ResponseType.Loading -> {
+
+            }
+
+            is ResponseType.Success -> {
+
+                pendingOrdersList.clear()
+                pendingOrdersList.addAll(pendingRequestState.value.data!!)
+
             }
         }
 
@@ -276,33 +342,8 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
 
             Spacer(modifier = Modifier.padding(2.dp))
 
-            val mechanicId = sharedPreferences.getString("mechanicId", "")!!
-
-            LaunchedEffect(key1 = Unit) {
-                scope.launch(Dispatchers.Main) {
-                    homeScreenViewModel.getLiveRequest(mechanicId).collect {
-                        when (it) {
-                            is ResponseType.Error -> {
-
-                            }
-
-                            is ResponseType.Loading -> {
-
-                            }
-
-                            is ResponseType.Success -> {
-                                val list = mutableListOf(OrderModel())
-                                list.clear()
-                                list.addAll(it.data!!)
-                                liveOrdersList.value = list
-                            }
-                        }
-                    }
-                }
-            }
-
-            NoDataText("No Live request", liveOrdersList.value.size.equals(0))
-            loadLiveRequests(liveOrdersList.value, navController)
+            NoDataText("No Live request", liveOrdersList.size.equals(0))
+            loadLiveRequests(liveOrdersList, navController)
 
             Spacer(modifier = Modifier.padding(6.dp))
 
@@ -310,36 +351,11 @@ fun HomeScreen(navController: NavController, sharedPreferences: SharedPreference
 
             }
 
-            LaunchedEffect(key1 = Unit) {
-                scope.launch(Dispatchers.Main) {
 
-                    homeScreenViewModel.getPendingRequest(mechanicId).collect {
-                        when (it) {
-                            is ResponseType.Error -> {
-
-                            }
-
-                            is ResponseType.Loading -> {
-
-                            }
-
-                            is ResponseType.Success -> {
-
-                                val list = mutableListOf(OrderModel())
-                                list.clear()
-                                list.addAll(it.data!!)
-                                pendingOrdersList.value = list
-
-                            }
-                        }
-                    }
-                }
-            }
-
-            NoDataText("No pending request", pendingOrdersList.value.size.equals(0))
+            NoDataText("No pending request", pendingOrdersList.size.equals(0))
 
             loadPendingRequests(
-                list = pendingOrdersList.value,
+                list = pendingOrdersList,
                 navController = navController,
                 homeScreenViewModel,
                 mechanicStatus.value
@@ -362,7 +378,6 @@ fun loadPendingRequests(
     navController: NavController,
     homeScreenViewModel: HomeScreenViewModel,
     mechanicStatus: String
-
 ) {
     val scope = rememberCoroutineScope()
 
@@ -373,6 +388,8 @@ fun loadPendingRequests(
             mechanicStatus
         ) {
             if (mechanicStatus.equals("Available")) {
+
+
                 scope.launch(Dispatchers.Main) {
                     homeScreenViewModel.startMechanicService(it.orderId).collect {
                         when (it) {
