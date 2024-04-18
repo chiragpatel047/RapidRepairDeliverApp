@@ -173,6 +173,7 @@ class MainActivity : ComponentActivity() {
                 ClientIssueDetailScreen(
                     navController,
                     sharedPreferences,
+                    this@MainActivity,
                     orderId,
                     userId,
                     corporateId,

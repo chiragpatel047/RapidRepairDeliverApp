@@ -15,8 +15,10 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
 import androidx.core.app.NotificationCompat
 import com.chirag047.rapiddeliver.BroadCasts.NotificationBroadcast
+import com.chirag047.rapiddeliver.Common.ResponseType
 import com.chirag047.rapiddeliver.Model.Coordinates
 import com.chirag047.rapiddeliver.R
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -27,6 +29,8 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.common.util.concurrent.ServiceManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -51,15 +55,17 @@ class LocationService() : Service() {
     private var location: Location? = null
 
     private val firestore: FirebaseFirestore = Firebase.firestore
+    private val auth: FirebaseAuth = Firebase.auth
 
     var orderId: String = ""
+    var statusUpdated: Boolean = false
 
     override fun onCreate() {
         super.onCreate()
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         locationRequest =
-            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 7000)
+            LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3000)
                 .build()
 
         locationCallback = object : LocationCallback() {
@@ -128,7 +134,6 @@ class LocationService() : Service() {
 
         CoroutineScope(Dispatchers.IO).launch {
 
-
             firestore.collection("liveTrack")
                 .document(orderId!!)
                 .set(Coordinates(location!!.latitude, location!!.longitude))
@@ -167,8 +172,33 @@ class LocationService() : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
         orderId = intent!!.getStringExtra("orderId")!!
         createLocationRequest()
+
+        if (!statusUpdated) {
+            CoroutineScope(Dispatchers.IO).launch {
+
+                firestore.collection("orders")
+                    .document(orderId)
+                    .update("orderStatus", "Live")
+                    .addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            firestore.collection("mechanicUsers")
+                                .document(auth.currentUser!!.uid)
+                                .update("mechanicStatus", "On service")
+                                .addOnCompleteListener {
+                                    if (it.isSuccessful) {
+                                        statusUpdated = true
+                                    }
+                                }
+                        } else {
+
+                        }
+                    }
+            }
+        }
+
         return START_STICKY
     }
 

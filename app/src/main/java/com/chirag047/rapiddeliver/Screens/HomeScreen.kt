@@ -357,7 +357,6 @@ fun HomeScreen(
 
             }
 
-
             NoDataText("No pending request", pendingOrdersList.size.equals(0))
 
             loadPendingRequests(
@@ -370,6 +369,7 @@ fun HomeScreen(
             )
 
         }
+
         customProgressBar(show = showProgressBar.value, title = "Wait a moment...")
 
         SnackbarWithoutScaffold(
@@ -401,24 +401,25 @@ fun loadPendingRequests(
 
                 var service = Intent(context, LocationService()::class.java)
                 service.putExtra("orderId", it.orderId)
+                context.startService(service)
 
-                scope.launch(Dispatchers.Main) {
-                    homeScreenViewModel.startMechanicService(it.orderId).collect {
-                        when (it) {
-                            is ResponseType.Error -> {
-
-                            }
-
-                            is ResponseType.Loading -> {
-
-                            }
-
-                            is ResponseType.Success -> {
-                                context.startService(service)
-                            }
-                        }
-                    }
-                }
+//                scope.launch(Dispatchers.Main) {
+//                    homeScreenViewModel.startMechanicService(it.orderId).collect {
+//                        when (it) {
+//                            is ResponseType.Error -> {
+//
+//                            }
+//
+//                            is ResponseType.Loading -> {
+//
+//                            }
+//
+//                            is ResponseType.Success -> {
+//
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
     }
@@ -434,7 +435,9 @@ fun loadLiveRequests(
     list.forEach {
         TrackSingle(
             it.vehicleOwner,
-            it.vehicleCompany + " " + it.vehicleModel + " | " + it.vehicleFuelType, {
+            it.vehicleCompany + " " + it.vehicleModel + " | " + it.vehicleFuelType,
+            it.orderStatus,
+            {
 
                 CoroutineScope(Dispatchers.IO).launch {
                     homeScreenViewModel.doneMechanicService(it.orderId)

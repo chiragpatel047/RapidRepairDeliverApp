@@ -37,7 +37,13 @@ import com.chirag047.rapiddeliver.R
 import com.chirag047.rapiddeliver.Services.LocationService
 
 @Composable
-fun TrackSingle(title: String, desc: String, stop: () -> Unit, onclick: () -> Unit) {
+fun TrackSingle(
+    title: String,
+    desc: String,
+    status: String,
+    stop: () -> Unit,
+    onclick: () -> Unit
+) {
     Row(
         Modifier
             .padding(15.dp, 7.dp)
@@ -98,7 +104,7 @@ fun TrackSingle(title: String, desc: String, stop: () -> Unit, onclick: () -> Un
                     },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                     modifier = Modifier
-                        .padding(15.dp, 10.dp,5.dp,10.dp)
+                        .padding(15.dp, 10.dp, 5.dp, 10.dp)
                 ) {
                     Text(
                         text = "Completed",
@@ -112,7 +118,7 @@ fun TrackSingle(title: String, desc: String, stop: () -> Unit, onclick: () -> Un
                     },
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
                     modifier = Modifier
-                        .padding(5.dp, 10.dp,15.dp,10.dp)
+                        .padding(5.dp, 10.dp, 15.dp, 10.dp)
                 ) {
                     Text(
                         text = "Track",

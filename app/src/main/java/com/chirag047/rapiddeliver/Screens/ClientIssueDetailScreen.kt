@@ -1,5 +1,7 @@
 package com.chirag047.rapiddeliver.Screens
 
+import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,6 +38,7 @@ import com.chirag047.rapiddeliver.Common.ResponseType
 import com.chirag047.rapiddeliver.Components.ActionBarWIthBack
 import com.chirag047.rapiddeliver.Components.poppinsBoldText
 import com.chirag047.rapiddeliver.R
+import com.chirag047.rapiddeliver.Services.LocationService
 import com.chirag047.rapiddeliver.Viewmodels.ClientIssueDetailViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -44,6 +47,7 @@ import kotlinx.coroutines.launch
 fun ClientIssueDetailScreen(
     navController: NavController,
     sharedPreferences: SharedPreferences,
+    context: Context,
     orderId: String,
     userId: String,
     corporateId: String,
@@ -255,29 +259,31 @@ fun ClientIssueDetailScreen(
                             .clickable {
 
                                 if (mechanicStatus.equals("Available")) {
-                                    scope.launch(Dispatchers.Main) {
+                                    var service = Intent(context, LocationService()::class.java)
+                                    service.putExtra("orderId", orderId)
+                                    context.startService(service)
 
-                                        val mechanicId =
-                                            sharedPreferences.getString("mechanicId", "")!!
-
-                                        clientIssueDetailViewModel
-                                            .startMechanicService(mechanicId)
-                                            .collect {
-                                                when (it) {
-                                                    is ResponseType.Error -> {
-
-                                                    }
-
-                                                    is ResponseType.Loading -> {
-
-                                                    }
-
-                                                    is ResponseType.Success -> {
-
-                                                    }
-                                                }
-                                            }
-                                    }
+//                                    scope.launch(Dispatchers.Main) {
+//
+//
+//                                        clientIssueDetailViewModel
+//                                            .startMechanicService(orderId)
+//                                            .collect {
+//                                                when (it) {
+//                                                    is ResponseType.Error -> {
+//
+//                                                    }
+//
+//                                                    is ResponseType.Loading -> {
+//
+//                                                    }
+//
+//                                                    is ResponseType.Success -> {
+//
+//                                                    }
+//                                                }
+//                                            }
+//                                    }
 
                                 }
 
