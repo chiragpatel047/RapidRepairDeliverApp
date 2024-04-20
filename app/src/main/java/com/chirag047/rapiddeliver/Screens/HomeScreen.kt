@@ -251,7 +251,12 @@ fun HomeScreen(
                 Modifier
                     .padding(15.dp)
                     .clip(RoundedCornerShape(25.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .background(
+                        if (mechanicStatus.value.equals("Available")) MaterialTheme.colorScheme.primaryContainer else if (mechanicStatus.value.equals(
+                                "Not Available"
+                            )
+                        ) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer
+                    )
             ) {
 
                 Column(Modifier.fillMaxWidth()) {
@@ -285,7 +290,10 @@ fun HomeScreen(
                                     Modifier
                                         .size(30.dp)
                                         .padding(0.dp, 8.dp, 0.dp, 8.dp),
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = if (mechanicStatus.value.equals("Available")) MaterialTheme.colorScheme.primary else if (mechanicStatus.value.equals(
+                                            "Not Available"
+                                        )
+                                    ) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                                 )
 
                                 Text(
@@ -304,7 +312,10 @@ fun HomeScreen(
                                     Modifier
                                         .size(30.dp)
                                         .padding(0.dp, 8.dp, 0.dp, 8.dp),
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = if (mechanicStatus.value.equals("Available")) MaterialTheme.colorScheme.primary else if (mechanicStatus.value.equals(
+                                            "Not Available"
+                                        )
+                                    ) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
                                 )
                                 Text(
                                     text = mechanicId.value,
@@ -321,9 +332,21 @@ fun HomeScreen(
 
                         Button(
                             onClick = {
+                                scope.launch {
+                                    if (mechanicStatus.value.equals("Available")) {
+                                        homeScreenViewModel.updateMechanicStatus("Not Available")
+                                    } else {
+                                        homeScreenViewModel.updateMechanicStatus("Available")
+                                    }
+                                }
 
                             },
-                            colors = ButtonDefaults.buttonColors(if (mechanicStatus.value.equals("Available")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary),
+                            colors = ButtonDefaults.buttonColors(
+                                if (mechanicStatus.value.equals("Available")) MaterialTheme.colorScheme.primary else if (mechanicStatus.value.equals(
+                                        "Not Available"
+                                    )
+                                ) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary
+                            ),
                             modifier = Modifier
                                 .padding(0.dp, 0.dp, 10.dp, 0.dp)
                         ) {
@@ -399,6 +422,15 @@ fun loadPendingRequests(
         ) {
             if (mechanicStatus.equals("Available")) {
 
+                val lm =
+                    context.getSystemService(LOCATION_SERVICE) as LocationManager
+
+                if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    val intent: Intent =
+                        Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    context.startActivity(intent)
+                }
+
                 var service = Intent(context, LocationService()::class.java)
                 service.putExtra("orderId", it.orderId)
                 context.startService(service)
@@ -442,7 +474,6 @@ fun loadLiveRequests(
                 CoroutineScope(Dispatchers.IO).launch {
                     homeScreenViewModel.doneMechanicService(it.orderId)
                 }
-
                 var service = Intent(context, LocationService()::class.java)
                 context.stopService(service)
             }

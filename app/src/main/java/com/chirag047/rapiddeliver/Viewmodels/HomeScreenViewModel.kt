@@ -32,6 +32,12 @@ class HomeScreenViewModel @Inject constructor(val dataRepository: DataRepository
     val doneData: StateFlow<ResponseType<String>>
         get() = _doneData
 
+
+    private val _statusChanged = MutableStateFlow<ResponseType<String>>(ResponseType.Loading())
+    val statusChanged: StateFlow<ResponseType<String>>
+        get() = _statusChanged
+
+
     suspend fun getUserDetail() = dataRepository.getUserDetail()
     suspend fun getPendingRequest(mechanicId: String) {
         viewModelScope.launch {
@@ -60,5 +66,13 @@ class HomeScreenViewModel @Inject constructor(val dataRepository: DataRepository
             }
         }
 
+    }
+
+    suspend fun updateMechanicStatus(status: String) {
+        viewModelScope.launch {
+            dataRepository.updateMechanicStatus(status).collect {
+                _statusChanged.emit(it)
+            }
+        }
     }
 }

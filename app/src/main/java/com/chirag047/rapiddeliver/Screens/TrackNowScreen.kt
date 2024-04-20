@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -88,9 +89,24 @@ fun TrackNowScreen(
         mutableStateOf(false)
     }
 
-    var openMySnackbar = remember { mutableStateOf(false) }
-    var snackBarMsg = remember { mutableStateOf("") }
+    val isMapLoaded = remember {
+        mutableStateOf(false)
+    }
 
+    val openMySnackbar = remember { mutableStateOf(false) }
+    val snackBarMsg = remember { mutableStateOf("") }
+
+
+    val markerState =
+        remember {
+            mutableStateOf(
+                MarkerState(
+                    position = LatLng(
+                        0.0, 0.0
+                    )
+                )
+            )
+        }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -105,32 +121,22 @@ fun TrackNowScreen(
                 ActionBarWIthBack(title = "Track location")
             }
 
-            when (result.value) {
-                is ResponseType.Error -> {
+            val cameraPositionState = rememberCameraPositionState {
+                position = CameraPosition.fromLatLngZoom(markerState.value.position, 12f)
+            }
 
-                }
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
 
-                is ResponseType.Loading -> {
-
-                }
-
-                is ResponseType.Success -> {
-
-                    val markerState =
-                        remember {
-                            mutableStateOf(
-                                MarkerState(
-                                    position = LatLng(
-                                        result.value.data!!.lat,
-                                        result.value.data!!.long
-                                    )
-                                )
-                            )
-                        }
-
-                    val cameraPositionState = rememberCameraPositionState {
-                        position = CameraPosition.fromLatLngZoom(markerState.value.position, 12f)
+                if (!isMapLoaded.value) {
+                    Box(Modifier.fillMaxSize()) {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
                     }
+
+                } else {
 
                     GoogleMap(
                         modifier = Modifier
@@ -171,6 +177,26 @@ fun TrackNowScreen(
                         )
 
                     }
+                }
+
+            }
+
+            when (result.value) {
+                is ResponseType.Error -> {
+
+                }
+
+                is ResponseType.Loading -> {
+
+                }
+
+                is ResponseType.Success -> {
+
+                    markerState.value.position =
+                        LatLng(result.value.data!!.lat, result.value.data!!.long)
+
+                    isMapLoaded.value = true
+
                 }
             }
 
@@ -246,12 +272,11 @@ fun TrackNowScreen(
                             label = "Completed",
                             color = MaterialTheme.colorScheme.primary
                         ) {
-                            var service = Intent(context, LocationService()::class.java)
-                            context.stopService(service)
-
                             CoroutineScope(Dispatchers.IO).launch {
                                 trackNowScreenViewModel.doneMechanicService(orderId)
                             }
+                            var service = Intent(context, LocationService()::class.java)
+                            context.stopService(service)
 
                             when (doneResult.value) {
                                 is ResponseType.Error -> {
@@ -261,7 +286,6 @@ fun TrackNowScreen(
                                 }
 
                                 is ResponseType.Loading -> {
-                                    showProgressBar.value = true
 
                                 }
 
@@ -269,7 +293,6 @@ fun TrackNowScreen(
                                     showProgressBar.value = false
                                     snackBarMsg.value = doneResult.value.data!!
                                     openMySnackbar.value = true
-                                    navController.popBackStack()
                                 }
                             }
 

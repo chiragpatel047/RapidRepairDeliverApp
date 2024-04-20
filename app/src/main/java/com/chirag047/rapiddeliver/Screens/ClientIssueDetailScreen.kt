@@ -3,6 +3,8 @@ package com.chirag047.rapiddeliver.Screens
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.location.LocationManager
+import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -259,6 +261,17 @@ fun ClientIssueDetailScreen(
                             .clickable {
 
                                 if (mechanicStatus.equals("Available")) {
+
+
+                                    val lm =
+                                        context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+                                    if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                                        val intent: Intent =
+                                            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                                        context.startActivity(intent)
+                                    }
+
                                     var service = Intent(context, LocationService()::class.java)
                                     service.putExtra("orderId", orderId)
                                     context.startService(service)

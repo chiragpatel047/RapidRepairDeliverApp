@@ -82,6 +82,7 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
 
     suspend fun startMechanicService(orderId: String): Flow<ResponseType<String>> =
         callbackFlow {
+
             trySend(ResponseType.Loading())
 
             firestore.collection("orders")
@@ -161,6 +162,27 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
                             }
                     } else {
                         trySend(ResponseType.Error("Something went wrong"))
+                    }
+                }
+
+            awaitClose {
+                close()
+            }
+        }
+
+
+    suspend fun updateMechanicStatus(status: String): Flow<ResponseType<String>> =
+        callbackFlow {
+            trySend(ResponseType.Loading())
+
+            firestore.collection("mechanicUsers")
+                .document(auth.currentUser!!.uid)
+                .update("mechanicStatus", status)
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        trySend(ResponseType.Success("Status Updated"))
+                    } else {
+                        trySend(ResponseType.Success("Something went wrong"))
                     }
                 }
 
