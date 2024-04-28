@@ -23,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.chirag047.rapiddeliver.Screens.ClientIssueDetailScreen
 import com.chirag047.rapiddeliver.Screens.ClientLocationScreen
+import com.chirag047.rapiddeliver.Screens.EditProfile
 import com.chirag047.rapiddeliver.Screens.ForgetPassword
 import com.chirag047.rapiddeliver.Screens.LoginScreen
 import com.chirag047.rapiddeliver.Screens.MainScreen
@@ -134,6 +135,9 @@ class MainActivity : ComponentActivity() {
             }
             composable(route = "SelectCityScreen") {
                 SelectCityScreen(navController, sharedPreferences)
+            }
+            composable(route = "EditProfile") {
+                EditProfile(navController, sharedPreferences)
             }
             composable(route = "TrackNowScreen" + "/{orderId}/{clientAddress}/{clientLatitude}/{clientLongitude}") {
 

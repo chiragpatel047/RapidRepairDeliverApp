@@ -37,6 +37,7 @@ class AuthRepository @Inject constructor(
                         "",
                         "",
                         "",
+                        "",
                         "Available"
                     )
                 firebaseFirestore.collection("mechanicUsers")

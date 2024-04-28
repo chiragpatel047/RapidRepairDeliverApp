@@ -1,5 +1,7 @@
 package com.chirag047.rapiddeliver.Repository
 
+import android.content.SharedPreferences
+import android.net.Uri
 import com.chirag047.rapiddeliver.Common.ResponseType
 import com.chirag047.rapiddeliver.Model.Coordinates
 import com.chirag047.rapiddeliver.Model.OrderModel
@@ -7,12 +9,13 @@ import com.chirag047.rapiddeliver.Model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 
-class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: FirebaseFirestore) {
+class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: FirebaseFirestore,val storage: FirebaseStorage) {
 
     suspend fun updateUserCity(city: String, mechanicId: String): Flow<ResponseType<String>> =
         callbackFlow {
@@ -190,5 +193,42 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
                 close()
             }
         }
+
+    suspend fun updateUserProfilePictureAndPhone(
+        userImage: String, userName: String, phoneNo: String, sharedPreferences: SharedPreferences
+    ): Flow<ResponseType<String>> = callbackFlow {
+        trySend(ResponseType.Loading())
+
+        if (!userImage.equals("")) {
+
+            val ref = storage.reference.child("mechanicUser").child("userProfilePhotos")
+                .child(System.currentTimeMillis().toString())
+
+            ref.putFile(Uri.parse(userImage)).addOnSuccessListener {
+                ref.downloadUrl.addOnSuccessListener {
+                    sharedPreferences.edit().putString("profileImage", it.toString()).apply()
+
+                    firestore.collection("mechanicUsers").document(auth.currentUser!!.uid)
+                        .update("userImage", it, "userName", userName, "phoneNo", phoneNo)
+                        .addOnCompleteListener {
+                            if (it.isSuccessful) {
+                                trySend(ResponseType.Success("Updated successfully"))
+                            }
+                        }
+                }
+            }
+        } else {
+
+            firestore.collection("mechanicUsers").document(auth.currentUser!!.uid)
+                .update("userName", userName, "phoneNo", phoneNo).addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        trySend(ResponseType.Success("Updated successfully"))
+                    }
+                }
+        }
+        awaitClose {
+            close()
+        }
+    }
 
 }
