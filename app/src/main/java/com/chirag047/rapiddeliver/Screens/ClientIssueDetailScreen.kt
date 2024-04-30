@@ -120,40 +120,22 @@ fun ClientIssueDetailScreen(
                         }
                         Column {
                             detailContent(
-                                vehicleOwner,
-                                navController,
-                                clientLatitude,
-                                clientLongitude
+                                vehicleOwner, navController, clientLatitude, clientLongitude
                             )
                             detailContent(
-                                vehicleType,
-                                navController,
-                                clientLatitude,
-                                clientLongitude
+                                vehicleType, navController, clientLatitude, clientLongitude
                             )
                             detailContent(
-                                vehicleCompany,
-                                navController,
-                                clientLatitude,
-                                clientLongitude
+                                vehicleCompany, navController, clientLatitude, clientLongitude
                             )
                             detailContent(
-                                vehicleModel,
-                                navController,
-                                clientLatitude,
-                                clientLongitude
+                                vehicleModel, navController, clientLatitude, clientLongitude
                             )
                             detailContent(
-                                vehicleFuelType,
-                                navController,
-                                clientLatitude,
-                                clientLongitude
+                                vehicleFuelType, navController, clientLatitude, clientLongitude
                             )
                             detailContent(
-                                vehicleLicensePlate,
-                                navController,
-                                clientLatitude,
-                                clientLongitude
+                                vehicleLicensePlate, navController, clientLatitude, clientLongitude
                             )
                         }
                     }
@@ -191,22 +173,13 @@ fun ClientIssueDetailScreen(
                         }
                         Column {
                             detailContent(
-                                serviceType,
-                                navController,
-                                clientLatitude,
-                                clientLongitude
+                                serviceType, navController, clientLatitude, clientLongitude
                             )
                             detailContent(
-                                "Locate Client",
-                                navController,
-                                clientLatitude,
-                                clientLongitude
+                                "Locate Client", navController, clientLatitude, clientLongitude
                             )
                             detailContent(
-                                clientAddress,
-                                navController,
-                                clientLatitude,
-                                clientLongitude
+                                clientAddress, navController, clientLatitude, clientLongitude
                             )
                         }
                     }
@@ -233,10 +206,7 @@ fun ClientIssueDetailScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         detailContent(
-                            clientAddedText,
-                            navController,
-                            clientLatitude,
-                            clientLongitude
+                            clientAddedText, navController, clientLatitude, clientLongitude
                         )
                     }
                 }
@@ -252,56 +222,55 @@ fun ClientIssueDetailScreen(
                         .fillMaxWidth()
                         .padding(20.dp, 25.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(25.dp))
-                            .background(if (mechanicStatus.equals("Available")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
-                            .weight(1f)
-                            .clickable {
+                    Row(modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(25.dp))
+                        .background(if (mechanicStatus.equals("Available")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+                        .weight(1f)
+                        .clickable {
 
-                                if (mechanicStatus.equals("Available")) {
+                            if (mechanicStatus.equals("Available")) {
 
 
-                                    val lm =
-                                        context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                                val lm =
+                                    context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-                                    if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                                        val intent: Intent =
-                                            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                                        context.startActivity(intent)
-                                    }
+                                if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                                    val intent: Intent =
+                                        Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                                    context.startActivity(intent)
+                                }
 
-                                    var service = Intent(context, LocationService()::class.java)
-                                    service.putExtra("orderId", orderId)
-                                    context.startService(service)
+                                var service = Intent(context, LocationService()::class.java)
+                                service.putExtra("orderId", orderId)
+                                context.startService(service)
 
-//                                    scope.launch(Dispatchers.Main) {
-//
-//
-//                                        clientIssueDetailViewModel
-//                                            .startMechanicService(orderId)
-//                                            .collect {
-//                                                when (it) {
-//                                                    is ResponseType.Error -> {
-//
-//                                                    }
-//
-//                                                    is ResponseType.Loading -> {
-//
-//                                                    }
-//
-//                                                    is ResponseType.Success -> {
-//
-//                                                    }
-//                                                }
-//                                            }
-//                                    }
+                                scope.launch(Dispatchers.Main) {
 
+                                    clientIssueDetailViewModel
+                                        .startMechanicService(
+                                            orderId, corporateId, vehicleOwner,userId
+                                        )
+                                        .collect {
+                                            when (it) {
+                                                is ResponseType.Error -> {
+
+                                                }
+
+                                                is ResponseType.Loading -> {
+
+                                                }
+
+                                                is ResponseType.Success -> {
+
+                                                }
+                                            }
+                                        }
                                 }
 
                             }
-                    ) {
+
+                        }) {
                         Text(
                             text = "Start now",
                             fontSize = 14.sp,
@@ -322,32 +291,22 @@ fun ClientIssueDetailScreen(
 @Composable
 fun detailTitle(title: String) {
     poppinsBoldText(
-        contentText = title,
-        size = 14.sp,
-        modifier = Modifier
-            .padding(15.dp, 5.dp, 15.dp, 0.dp)
+        contentText = title, size = 14.sp, modifier = Modifier.padding(15.dp, 5.dp, 15.dp, 0.dp)
     )
 }
 
 @Composable
 fun colanText() {
     poppinsBoldText(
-        contentText = ":",
-        size = 14.sp,
-        modifier = Modifier
-            .padding(15.dp, 5.dp, 15.dp, 0.dp)
+        contentText = ":", size = 14.sp, modifier = Modifier.padding(15.dp, 5.dp, 15.dp, 0.dp)
     )
 }
 
 @Composable
 fun detailContent(
-    content: String,
-    navController: NavController,
-    clientLatitude: String,
-    clientLongitude: String
+    content: String, navController: NavController, clientLatitude: String, clientLongitude: String
 ) {
-    Text(
-        text = content,
+    Text(text = content,
         fontFamily = FontFamily(Font(R.font.poppins_medium)),
         fontSize = 14.sp,
         textDecoration = if (content.equals("Locate Client")) TextDecoration.Underline else TextDecoration.None,
@@ -358,6 +317,5 @@ fun detailContent(
                 if (content.equals("Locate Client")) {
                     navController.navigate("ClientLocationScreen" + "/$clientLatitude" + "/$clientLongitude")
                 }
-            }
-    )
+            })
 }

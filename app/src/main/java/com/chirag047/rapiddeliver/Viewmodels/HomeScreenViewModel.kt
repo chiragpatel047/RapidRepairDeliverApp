@@ -48,16 +48,26 @@ class HomeScreenViewModel @Inject constructor(val dataRepository: DataRepository
     }
 
 
-    suspend fun doneMechanicService(orderId: String) {
+    suspend fun doneMechanicService(
+        orderId: String,
+        centerId: String,
+        userId: String,
+        owner: String
+    ) {
         viewModelScope.launch {
-            dataRepository.doneMechanicService(orderId).collect {
+            dataRepository.doneMechanicService(orderId, centerId, userId, owner).collect {
                 _doneData.emit(it)
             }
         }
     }
 
-    suspend fun startMechanicService(orderId: String) =
-        dataRepository.startMechanicService(orderId)
+    suspend fun startMechanicService(
+        orderId: String,
+        centerId: String,
+        owner: String,
+        userId: String
+    ) =
+        dataRepository.startMechanicService(orderId, centerId, owner, userId)
 
     suspend fun getLiveRequest(mechanicId: String) {
         viewModelScope.launch {

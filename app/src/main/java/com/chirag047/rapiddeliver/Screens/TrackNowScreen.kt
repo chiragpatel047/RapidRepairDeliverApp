@@ -70,6 +70,9 @@ fun TrackNowScreen(
     navController: NavController, orderId: String, clientAddress: String,
     clientLatitude: String,
     clientLongitude: String,
+    centerId: String,
+    userId: String,
+    vehicleOwner: String,
     context: Context
 ) {
 
@@ -273,7 +276,12 @@ fun TrackNowScreen(
                             color = MaterialTheme.colorScheme.primary
                         ) {
                             CoroutineScope(Dispatchers.IO).launch {
-                                trackNowScreenViewModel.doneMechanicService(orderId)
+                                trackNowScreenViewModel.doneMechanicService(
+                                    orderId,
+                                    centerId,
+                                    userId,
+                                    vehicleOwner
+                                )
                             }
                             var service = Intent(context, LocationService()::class.java)
                             context.stopService(service)

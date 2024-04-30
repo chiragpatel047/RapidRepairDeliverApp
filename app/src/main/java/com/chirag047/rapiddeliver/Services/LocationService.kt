@@ -176,29 +176,6 @@ class LocationService() : Service() {
         orderId = intent!!.getStringExtra("orderId")!!
         createLocationRequest()
 
-        if (!statusUpdated) {
-            CoroutineScope(Dispatchers.IO).launch {
-
-                firestore.collection("orders")
-                    .document(orderId)
-                    .update("orderStatus", "Live")
-                    .addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            firestore.collection("mechanicUsers")
-                                .document(auth.currentUser!!.uid)
-                                .update("mechanicStatus", "On service")
-                                .addOnCompleteListener {
-                                    if (it.isSuccessful) {
-                                        statusUpdated = true
-                                    }
-                                }
-                        } else {
-
-                        }
-                    }
-            }
-        }
-
         return START_STICKY
     }
 

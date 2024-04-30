@@ -139,17 +139,23 @@ class MainActivity : ComponentActivity() {
             composable(route = "EditProfile") {
                 EditProfile(navController, sharedPreferences)
             }
-            composable(route = "TrackNowScreen" + "/{orderId}/{clientAddress}/{clientLatitude}/{clientLongitude}") {
+            composable(route = "TrackNowScreen" + "/{orderId}/{clientAddress}/{clientLatitude}/{clientLongitude}/{centerId}/{userId}/{vehicleOwner}") {
 
                 val orderId = it.arguments?.getString("orderId")!!
                 val clientAddress = it.arguments?.getString("clientAddress")!!
                 val clientLatitude = it.arguments?.getString("clientLatitude")!!
                 val clientLongitude = it.arguments?.getString("clientLongitude")!!
+                val centerId = it.arguments?.getString("centerId")!!
+                val userId = it.arguments?.getString("userId")!!
+                val vehicleOwner = it.arguments?.getString("vehicleOwner")!!
 
                 TrackNowScreen(
                     navController, orderId, clientAddress,
                     clientLatitude,
                     clientLongitude,
+                    centerId,
+                    userId,
+                    vehicleOwner,
                     this@MainActivity
                 )
             }

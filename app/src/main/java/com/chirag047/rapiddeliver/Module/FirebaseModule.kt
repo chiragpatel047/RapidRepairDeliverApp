@@ -29,7 +29,6 @@ object FirebaseModule {
         return Firebase.firestore
     }
 
-
     @Singleton
     @Provides
     fun firebaseStorageObject(): FirebaseStorage {

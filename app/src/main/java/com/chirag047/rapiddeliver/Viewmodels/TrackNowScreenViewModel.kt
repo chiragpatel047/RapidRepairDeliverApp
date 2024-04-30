@@ -33,9 +33,13 @@ class TrackNowScreenViewModel @Inject constructor(val dataRepository: DataReposi
         }
     }
 
-    suspend fun doneMechanicService(orderId: String) {
+    suspend fun doneMechanicService(
+        orderId: String, centerId: String,
+        userId: String,
+        owner: String
+    ) {
         viewModelScope.launch {
-            dataRepository.doneMechanicService(orderId).collect {
+            dataRepository.doneMechanicService(orderId, centerId, userId, owner).collect {
                 _doneData.emit(it)
             }
         }

@@ -206,7 +206,7 @@ fun LoginScreen(navController: NavController, sharedPreferences: SharedPreferenc
                     openMySnackbar.value = true
                     return@FullWidthButton
                 }
-
+                
                 val loginScope = scope.launch(Dispatchers.Main) {
                     loginViewModel.loginUser(emailText, passwordText).collect {
                         when (it) {
@@ -221,6 +221,9 @@ fun LoginScreen(navController: NavController, sharedPreferences: SharedPreferenc
                                     .putString("mechanicId", it.data!!.mechanicId)
                                     .apply()
 
+                                sharedPreferences.edit()
+                                    .putString("profileImage", it.data!!.userImage).apply()
+                                
                                 navController.popBackStack()
                                 navController.popBackStack()
                                 navController.popBackStack()

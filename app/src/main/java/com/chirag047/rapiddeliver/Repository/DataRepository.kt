@@ -2,20 +2,33 @@ package com.chirag047.rapiddeliver.Repository
 
 import android.content.SharedPreferences
 import android.net.Uri
+import com.chirag047.rapiddeliver.Api.NotificationApi
 import com.chirag047.rapiddeliver.Common.ResponseType
 import com.chirag047.rapiddeliver.Model.Coordinates
+import com.chirag047.rapiddeliver.Model.FirebaseNotificationModel
 import com.chirag047.rapiddeliver.Model.OrderModel
+import com.chirag047.rapiddeliver.Model.PushNotification
 import com.chirag047.rapiddeliver.Model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
 import javax.inject.Inject
 
-class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: FirebaseFirestore,val storage: FirebaseStorage) {
+class DataRepository @Inject constructor(
+    val auth: FirebaseAuth,
+    val firestore: FirebaseFirestore,
+    val storage: FirebaseStorage,
+    val notificationApi: NotificationApi
+) {
 
     suspend fun updateUserCity(city: String, mechanicId: String): Flow<ResponseType<String>> =
         callbackFlow {
@@ -83,7 +96,12 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
             }
         }
 
-    suspend fun startMechanicService(orderId: String): Flow<ResponseType<String>> =
+    suspend fun startMechanicService(
+        orderId: String,
+        centerId: String,
+        ownerName: String,
+        userId: String
+    ): Flow<ResponseType<String>> =
         callbackFlow {
 
             trySend(ResponseType.Loading())
@@ -91,20 +109,49 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
             firestore.collection("orders")
                 .document(orderId)
                 .update("orderStatus", "Live")
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        firestore.collection("mechanicUsers")
-                            .document(auth.currentUser!!.uid)
-                            .update("mechanicStatus", "On service")
-                            .addOnCompleteListener {
-                                if (it.isSuccessful) {
-                                    trySend(ResponseType.Success("Started now"))
-                                }
-                            }
-                    } else {
-                        trySend(ResponseType.Error("Something went wrong"))
-                    }
+                .await()
+
+            firestore.collection("mechanicUsers")
+                .document(auth.currentUser!!.uid)
+                .update("mechanicStatus", "On service")
+                .await()
+
+            val notify = withContext(Dispatchers.IO) {
+
+                val notification = PushNotification(
+                    FirebaseNotificationModel(
+                        ownerName + "'s service is stared by mechanic",
+                        "Click here for live track mechanic"
+                    ), "/topics/" + centerId
+                )
+
+                try {
+                    val respose = notificationApi.postNotification(notification)
+                    trySend(ResponseType.Success("Started successfully"))
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
+            }
+
+            val notify2 = withContext(Dispatchers.IO) {
+
+                val notification = PushNotification(
+                    FirebaseNotificationModel(
+                        "Your service is started by mechanic",
+                        "Click here for live track mechanic"
+                    ), "/topics/" + userId
+                )
+
+                try {
+                    val respose = notificationApi.postNotification(notification)
+                    trySend(ResponseType.Success("Started successfully"))
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
 
             awaitClose {
                 close()
@@ -146,27 +193,65 @@ class DataRepository @Inject constructor(val auth: FirebaseAuth, val firestore: 
         }
 
 
-    suspend fun doneMechanicService(orderId: String): Flow<ResponseType<String>> =
+    suspend fun doneMechanicService(
+        orderId: String,
+        centerId: String,
+        userId: String,
+        ownerName: String
+    ): Flow<ResponseType<String>> =
         callbackFlow {
             trySend(ResponseType.Loading())
 
+            val sdf = SimpleDateFormat("hh:mm a | dd MMMM yyyy ")
+            val currentDate = sdf.format(Date())
+
             firestore.collection("orders")
                 .document(orderId)
-                .update("orderStatus", "Done")
-                .addOnCompleteListener {
-                    if (it.isSuccessful) {
-                        firestore.collection("mechanicUsers")
-                            .document(auth.currentUser!!.uid)
-                            .update("mechanicStatus", "Available")
-                            .addOnCompleteListener {
-                                if (it.isSuccessful) {
-                                    trySend(ResponseType.Success("Done"))
-                                }
-                            }
-                    } else {
-                        trySend(ResponseType.Error("Something went wrong"))
-                    }
+                .update("orderStatus", "Done", "orderInfo", "Done at : " + currentDate)
+                .await()
+
+            firestore.collection("mechanicUsers")
+                .document(auth.currentUser!!.uid)
+                .update("mechanicStatus", "Available")
+                .await()
+
+            val notify = withContext(Dispatchers.IO) {
+
+                val notification = PushNotification(
+                    FirebaseNotificationModel(
+                        "Service done successfully",
+                        ownerName + "'s service is done by mechanic"
+                    ), "/topics/" + centerId
+                )
+
+                try {
+                    val respose = notificationApi.postNotification(notification)
+                    trySend(ResponseType.Success("Started successfully"))
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
+            }
+
+
+            val notify2 = withContext(Dispatchers.IO) {
+
+                val notification = PushNotification(
+                    FirebaseNotificationModel(
+                        "Service done successfully",
+                        "Your service is done by mechanic"
+                    ), "/topics/" + userId
+                )
+
+                try {
+                    val respose = notificationApi.postNotification(notification)
+                    trySend(ResponseType.Success("Started successfully"))
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
 
             awaitClose {
                 close()

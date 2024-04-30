@@ -435,23 +435,28 @@ fun loadPendingRequests(
                 service.putExtra("orderId", it.orderId)
                 context.startService(service)
 
-//                scope.launch(Dispatchers.Main) {
-//                    homeScreenViewModel.startMechanicService(it.orderId).collect {
-//                        when (it) {
-//                            is ResponseType.Error -> {
-//
-//                            }
-//
-//                            is ResponseType.Loading -> {
-//
-//                            }
-//
-//                            is ResponseType.Success -> {
-//
-//                            }
-//                        }
-//                    }
-//                }
+                scope.launch(Dispatchers.Main) {
+                    homeScreenViewModel.startMechanicService(
+                        it.orderId,
+                        it.corporateId,
+                        it.vehicleOwner,
+                        it.userId
+                    ).collect {
+                        when (it) {
+                            is ResponseType.Error -> {
+
+                            }
+
+                            is ResponseType.Loading -> {
+
+                            }
+
+                            is ResponseType.Success -> {
+
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -472,13 +477,18 @@ fun loadLiveRequests(
             {
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    homeScreenViewModel.doneMechanicService(it.orderId)
+                    homeScreenViewModel.doneMechanicService(
+                        it.orderId,
+                        it.corporateId,
+                        it.userId,
+                        it.vehicleOwner
+                    )
                 }
                 var service = Intent(context, LocationService()::class.java)
                 context.stopService(service)
             }
         ) {
-            navController.navigate("TrackNowScreen" + "/${it.orderId}" + "/${it.clientAddress}" + "/${it.clientLatitude}" + "/${it.clientLongitude}")
+            navController.navigate("TrackNowScreen" + "/${it.orderId}" + "/${it.clientAddress}" + "/${it.clientLatitude}" + "/${it.clientLongitude}" + "/${it.corporateId}" + "/${it.userId}" + "/${it.vehicleOwner}")
         }
     }
 }

@@ -9,6 +9,6 @@ import javax.inject.Inject
 class ClientIssueDetailViewModel @Inject constructor(val dataRepository: DataRepository) :
     ViewModel() {
 
-    suspend fun startMechanicService(mechanicId: String) =
-        dataRepository.startMechanicService(mechanicId)
+    suspend fun startMechanicService(mechanicId: String,centerId: String, owner : String,userId : String) =
+        dataRepository.startMechanicService(mechanicId,centerId, owner,userId)
 }
