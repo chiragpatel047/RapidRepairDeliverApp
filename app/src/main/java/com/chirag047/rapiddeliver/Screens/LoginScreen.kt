@@ -52,6 +52,7 @@ import com.chirag047.rapiddeliver.Components.poppinsBoldCenterText
 import com.chirag047.rapiddeliver.Components.textBetweenTwoLines
 import com.chirag047.rapiddeliver.R
 import com.chirag047.rapidservice.ViewModel.LoginViewModel
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -223,7 +224,10 @@ fun LoginScreen(navController: NavController, sharedPreferences: SharedPreferenc
 
                                 sharedPreferences.edit()
                                     .putString("profileImage", it.data!!.userImage).apply()
-                                
+
+                                FirebaseMessaging.getInstance().subscribeToTopic(it.data!!.mechanicId)
+                                FirebaseMessaging.getInstance().subscribeToTopic("new")
+
                                 navController.popBackStack()
                                 navController.popBackStack()
                                 navController.popBackStack()

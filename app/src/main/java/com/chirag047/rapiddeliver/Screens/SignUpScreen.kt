@@ -63,6 +63,7 @@ import com.chirag047.rapiddeliver.Viewmodels.SignUpViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -273,6 +274,11 @@ fun SignUpScreen(navController: NavController, sharedPreferences: SharedPreferen
                                     sharedPreferences.edit()
                                         .putString("mechanicId", result.data!!.mechanicId)
                                         .apply()
+
+                                    FirebaseMessaging.getInstance()
+                                        .subscribeToTopic(result.data!!.mechanicId)
+                                    FirebaseMessaging.getInstance().subscribeToTopic("new")
+
 
                                     navController.navigate("SelectCityScreen")
 
