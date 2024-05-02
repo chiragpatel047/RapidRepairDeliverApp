@@ -12,9 +12,16 @@ import android.graphics.Color
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import com.chirag047.rapiddeliver.Model.NotificationModel
 import com.chirag047.rapiddeliver.R
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.tasks.await
+import java.text.SimpleDateFormat
+import java.util.Date
 import kotlin.random.Random
 
 const val CHANNEL_ID = "ORDER"
@@ -46,6 +53,31 @@ class FirebaseNotificationService : FirebaseMessagingService() {
             .build()
 
         notificationManager.notify(notificationId, notification)
+
+        val dateFormate = SimpleDateFormat("dd MMMM yyyy")
+        val currentDate = dateFormate.format(Date())
+
+        val timeFormate = SimpleDateFormat("hh:mm a")
+        val currentTime = timeFormate.format(Date())
+
+
+        val notificationModel = NotificationModel(
+            System.currentTimeMillis().toString(),
+            message.data["message"]!!,
+            currentDate,
+            currentTime
+        )
+
+        val firestore = Firebase.firestore
+        val auth = Firebase.auth
+
+        firestore.collection("mechanicUsers")
+            .document(auth.currentUser!!.uid)
+            .collection("notifications")
+            .document(notificationModel.notificationId)
+            .set(notificationModel).addOnCompleteListener {
+
+            }
 
     }
 

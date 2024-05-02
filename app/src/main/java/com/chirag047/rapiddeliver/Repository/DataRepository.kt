@@ -6,6 +6,7 @@ import com.chirag047.rapiddeliver.Api.NotificationApi
 import com.chirag047.rapiddeliver.Common.ResponseType
 import com.chirag047.rapiddeliver.Model.Coordinates
 import com.chirag047.rapiddeliver.Model.FirebaseNotificationModel
+import com.chirag047.rapiddeliver.Model.NotificationModel
 import com.chirag047.rapiddeliver.Model.OrderModel
 import com.chirag047.rapiddeliver.Model.PushNotification
 import com.chirag047.rapiddeliver.Model.UserModel
@@ -315,5 +316,23 @@ class DataRepository @Inject constructor(
             close()
         }
     }
+
+
+    suspend fun getMyAllNotifications(): Flow<ResponseType<List<NotificationModel>?>> =
+        callbackFlow {
+
+            trySend(ResponseType.Loading())
+
+            firestore.collection("mechanicUsers")
+                .document(auth.currentUser!!.uid)
+                .collection("notifications")
+                .addSnapshotListener { value, error ->
+                    trySend(ResponseType.Success(value!!.toObjects(NotificationModel::class.java))!!)
+                }
+
+            awaitClose {
+                close()
+            }
+        }
 
 }
