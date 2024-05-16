@@ -232,13 +232,7 @@ fun HomeScreen(
                             textAlign = TextAlign.Center,
                             fontSize = 14.sp
                         )
-                        Spacer(modifier = Modifier.padding(2.dp))
-                        Icon(
-                            painter = painterResource(id = R.drawable.down_arrow_icon),
-                            contentDescription = "",
-                            modifier = Modifier.size(12.dp),
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
+
                     }
                 }
 
@@ -377,20 +371,19 @@ fun HomeScreen(
             Spacer(modifier = Modifier.padding(6.dp))
 
             textWithSeeAllText(title = "Pending requests") {
-
+                navController.navigate("ServiceRequestListScreen"+ "/${mechanicStatus.value}")
             }
 
             NoDataText("No pending request", pendingOrdersList.size.equals(0))
 
             loadPendingRequests(
-                list = pendingOrdersList,
+                list = pendingOrdersList.take(3).reversed(),
                 navController = navController,
                 homeScreenViewModel,
                 mechanicStatus.value,
                 context,
                 sharedPreferences
             )
-
         }
 
         customProgressBar(show = showProgressBar.value, title = "Wait a moment...")

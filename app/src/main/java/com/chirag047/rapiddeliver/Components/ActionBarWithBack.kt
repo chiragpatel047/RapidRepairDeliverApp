@@ -24,15 +24,6 @@ fun ActionBarWIthBack(title : String){
             .padding(15.dp, 20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.down_arrow_icon),
-            contentDescription = "",
-            modifier = Modifier
-                .size(30.dp)
-                .padding(5.dp)
-                .rotate(90f),
-            tint = MaterialTheme.colorScheme.onBackground
-        )
         poppinsBoldCenterText(
             contentText = title,
             size = 16.sp,

@@ -29,6 +29,7 @@ import com.chirag047.rapiddeliver.Screens.LoginScreen
 import com.chirag047.rapiddeliver.Screens.MainScreen
 import com.chirag047.rapiddeliver.Screens.NotificationScreen
 import com.chirag047.rapiddeliver.Screens.SelectCityScreen
+import com.chirag047.rapiddeliver.Screens.ServiceRequestListScreen
 import com.chirag047.rapiddeliver.Screens.SignUpScreen
 import com.chirag047.rapiddeliver.Screens.TrackNowScreen
 import com.chirag047.rapiddeliver.Screens.WelcomeScreen
@@ -132,7 +133,7 @@ class MainActivity : ComponentActivity() {
             }
 
             composable(route = "MainScreen") {
-                MainScreen(navController, sharedPreferences,this@MainActivity)
+                MainScreen(navController, sharedPreferences, this@MainActivity)
             }
             composable(route = "SelectCityScreen") {
                 SelectCityScreen(navController, sharedPreferences)
@@ -145,6 +146,15 @@ class MainActivity : ComponentActivity() {
                 NotificationScreen(navController, sharedPreferences)
             }
 
+            composable(route = "ServiceRequestListScreen" + "/{mechanicStatus}") {
+                val mechanicStatus = it.arguments?.getString("mechanicStatus")!!
+                ServiceRequestListScreen(
+                    navController,
+                    mechanicStatus,
+                    this@MainActivity,
+                    sharedPreferences
+                )
+            }
             composable(route = "TrackNowScreen" + "/{orderId}/{clientAddress}/{clientLatitude}/{clientLongitude}/{centerId}/{userId}/{vehicleOwner}") {
 
                 val orderId = it.arguments?.getString("orderId")!!

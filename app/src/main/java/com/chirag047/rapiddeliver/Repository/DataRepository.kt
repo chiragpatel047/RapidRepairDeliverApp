@@ -12,6 +12,7 @@ import com.chirag047.rapiddeliver.Model.PushNotification
 import com.chirag047.rapiddeliver.Model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
@@ -121,8 +122,9 @@ class DataRepository @Inject constructor(
 
                 val notification = PushNotification(
                     FirebaseNotificationModel(
-                        ownerName + "'s service is stared by mechanic",
-                        "Click here for live track mechanic"
+                        "Service is started",
+                        ownerName + "'s service is stared by mechanic"
+
                     ), "/topics/" + centerId
                 )
 
@@ -139,8 +141,8 @@ class DataRepository @Inject constructor(
 
                 val notification = PushNotification(
                     FirebaseNotificationModel(
-                        "Your service is started by mechanic",
-                        "Click here for live track mechanic"
+                        "Service is started",
+                        "Your service is started by mechanic"
                     ), "/topics/" + userId
                 )
 
@@ -326,6 +328,7 @@ class DataRepository @Inject constructor(
             firestore.collection("mechanicUsers")
                 .document(auth.currentUser!!.uid)
                 .collection("notifications")
+                .orderBy("notificationId",Query.Direction.DESCENDING)
                 .addSnapshotListener { value, error ->
                     trySend(ResponseType.Success(value!!.toObjects(NotificationModel::class.java))!!)
                 }
